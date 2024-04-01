@@ -1,0 +1,22 @@
+{ "TableName": "Customers",
+  "Tags": [{"Key": "table_name", "Value": "Customers"}],
+  "BillingMode": "PAY_PER_REQUEST",
+  "AttributeDefinitions": [
+    {"AttributeName": "PK", "AttributeType": "S"},
+    {"AttributeName": "SK", "AttributeType": "S"},
+    {"AttributeName": "city", "AttributeType": "S"},
+    {"AttributeName": "rating", "AttributeType": "N"}
+  ],
+  "KeySchema": [{"KeyType": "HASH", "AttributeName": "PK"}, {"KeyType": "RANGE", "AttributeName": "SK"}],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "GSI-City",
+      "KeySchema": [{ "AttributeName": "city", "KeyType": "HASH" },{ "AttributeName": "rating", "KeyType": "RANGE" }],
+      "Projection": {"ProjectionType": "ALL"}
+    }
+  ],
+  "StreamSpecification": {
+    "StreamEnabled": true,
+    "StreamViewType": "NEW_AND_OLD_IMAGES"
+  }
+}
