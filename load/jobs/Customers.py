@@ -7,9 +7,9 @@ def row_maker(tick):
         'cust_id': pk,
         'name': 'Luna',
         'email': 'luna@dog.com',
-        'city': 'Ashland',
-        'last_updated': '2024-04-02',
-        'rating': tick * 4
+        'phone': '508-555-1212',
+        'credit_rating': 675,
+        'last_updated': '2024-05-02'
     }
 
     return row
@@ -18,7 +18,8 @@ def row_maker(tick):
 def job_info():
     job_params = {
         'db': 'mysql',
-        'table': 'app_db.customers',
+        'table': 'app_db.Customers',
         'row_count': 7,
     }
     return job_params
+

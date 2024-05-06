@@ -1,0 +1,170 @@
+.indexbody {
+    background-color:#fff;
+}
+
+.titlelink {
+    text-decoration:none;
+    font-weight:bold;
+    color:dodgerblue;
+    font-size:large;
+}
+
+.main {
+
+    border-radius:8px;
+    padding:8px;
+    font-family:Arial;
+}
+
+#bodycontent {
+    background-color: whitesmoke;
+    border-radius:8px;
+    padding:8px;
+    font-family:Arial;
+}
+#addAPI {
+    border:1px solid grey;
+    cursor:hand;
+    background-color:gray;
+    color: whitesmoke;
+
+}
+button {
+    border-radius:6px;
+    margin-left:5px;
+    padding-left:6px;
+    padding-right:6px;
+    padding-top:1px;
+    padding-bottom:1px;
+    border:1px solid silver;
+    background-color:gainsboro;
+}
+
+#crud_table {
+    border:none;
+    border-radius:5px;
+    border:1px solid silver;
+}
+
+#crud_table td {
+    padding:7px;
+    border-radius:3px;
+    vertical-align:top;
+    background-color:silver;
+
+}
+#apiTitle {
+    padding-left:10px;
+    padding:5px;
+    background-color:#eee;
+    font-size:smaller;
+    border-radius:5px;
+}
+.tabActive {
+    background-color:gainsboro;
+    font-weight:bold;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+    padding-bottom:8px;
+    border-bottom: 1px solid gainsboro;
+
+}
+.tabInactive {
+    background-color: whitesmoke;
+    font-weight: normal;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+    padding-bottom:8px;
+    border-bottom: none;
+
+}
+.tab {
+    border-radius:3px;
+    margin-left:5px;
+    padding:8px;
+    background-color: gainsboro;
+}
+
+#tabs {
+    color:grey;
+}
+.crudbutton {
+
+    border-radius:3px;
+    border:1px solid grey;
+}
+
+.tablePanel {
+    background-color:silver;
+    margin-left:10px;
+    border-spacing: 0;
+    border-radius:5px;
+    padding:5px;
+}
+
+#gridDiv {
+    background-color:whitesmoke;
+}
+#grid{
+    background-color:gainsboro;
+    margin-left:10px;
+    border-spacing: 0;
+}
+#grid tr td {
+    padding:5px;
+    border: 1px solid silver;
+    margin: none;
+    padding-right:10px;
+
+}
+.gridHeader {
+    background-color:silver;
+    font-weight:bold;
+    margin: 3px;
+    text-align:center;
+}
+
+.tablesButton {
+    border: 1px solid dimgray;
+}
+.tableButton {
+    margin-left:15px;
+    border: 1px solid dimgray;
+    color: dimgray;
+
+}
+.tableButtonActive {
+    background-color:whitesmoke;
+    color:black;
+    margin-left:15px;
+    font-weight: bold;
+    border: 1px solid dimgray;
+}
+.debug {
+    background-color:lemonchiffon;
+}
+.metadataHeader {
+
+}
+.metadataData {
+    border:1px solid dimgray;
+}
+
+#tableDetails {
+
+}
+#tableDetailsTable {
+
+}
+#tableList {
+    display: table-cell;
+}
+#tableListTd {
+    padding-top:5px;
+    padding-right:10px;
+    display:flex;
+}

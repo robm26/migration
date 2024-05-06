@@ -7,6 +7,22 @@ import sys
 import importlib
 
 
+mysql_host = ""
+mysql_db = "app_db"
+mysql_username = "admin"
+mysql_password = ""
+
+
+if "MYSQL_HOST" in os.environ:
+    mysql_host = os.environ['MYSQL_HOST']
+if "MYSQL_DB" in os.environ:
+    mysql_db = os.environ['MYSQL_DB']
+if "MYSQL_USERNAME" in os.environ:
+    mysql_username = os.environ['MYSQL_USERNAME']
+if "MYSQL_PASSWORD" in os.environ:
+    mysql_password = os.environ['MYSQL_PASSWORD']
+
+
 job_file = 'job1.py'
 ddb_local = False
 ddb_region = 'us-east-2'
@@ -43,10 +59,12 @@ def main(dynamodb=None, mysql_conn=None):
 
     if(job_info['db'] == 'mysql'):
         mysql_conn = mysql.connector.connect(
-          host="rmeg2skpwcsqx.cwbe59oiewwr.us-east-1.rds.amazonaws.com",
-          user="admin",
-          password="5HWmG3E4"
+          database=mysql_db,
+          user=mysql_username,
+          password=mysql_password,
+          host=mysql_host
         )
+
         mysql_cur = mysql_conn.cursor(buffered=True, dictionary=True)
 
 

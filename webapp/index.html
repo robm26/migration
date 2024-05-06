@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <title>Database Application</title>
+    <link rel="icon" type="image/x-icon" href="https://dynamodbworkshop.s3.amazonaws.com/favicon.ico">
+    <link rel="stylesheet" href="index.css">
+
+    <style>
+
+    </style>
+    <script src="./index.js" defer></script>
+    <script src="./api.js" defer></script>
+
+</head>
+<body class="indexbody" onLoad="renderNav()">
+<div class="main">
+    <div class="title">
+
+        &nbsp;&nbsp;&nbsp;<a href="" target=_blank class="titlelink">Database Application</a>
+        &nbsp;&nbsp;
+        <button id="sampleAPI1"
+                onClick="setCookie(prompt('Sample API', 'https://g4zp6m9brf.execute-api.us-east-2.amazonaws.com/api/'))">
+            Target API</button>
+        &nbsp;&nbsp;
+        <span id="apiTitle">
+
+        </span>
+<!--        <button id="sampleAPI2" onClick="setCookie(prompt('Sample API Ireland', 'https://mjr9wyamog.execute-api.eu-west-1.amazonaws.com/api/'))">Ireland</button>-->
+<!--        <button id="sampleAPI3" onClick="setCookie(prompt('Sample API Singapore', 'https://voax9a7ub2.execute-api.ap-southeast-1.amazonaws.com/api/'))">Singapore</button>-->
+
+    </div>
+    <br/>
+    <div id="bodycontent">
+
+        <div class="" id="tabs">
+            &nbsp;&nbsp;Access pattern:
+            <button class="tabActive" onclick="openTab('CRUD')">CRUD</button>
+            <button class="tabInactive" onclick="openTab('Querying')">Querying</button>
+            <button class="tabInactive" onclick="openTab('Joins')">Joins</button>
+            <button class="tabInactive" onclick="openTab('Multi-step')">Multi-step</button>
+        </div>
+
+        <div id="CRUD" class="tab" style="display:block">
+            Create, Read, Update, & Delete, the four basic database table operations.
+            <br/><br/>
+
+            <table class="tablePanel">
+                <tr><td colspan="2">
+                    <button class="tablesButton" onClick="listTables()">Tables</button>
+                </td>
+                    <tr><td id="tableListTd">
+                        <table id="tableList"></table>
+                    </td>
+                    <td>
+                        <div id="tableDetails">
+                            <table id="tableDetailsTable">
+
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+
+            </table>
+            <br/>
+<!--            <table id="crud_table">-->
+<!--                <thead></thead>-->
+<!--                <tbody>-->
+<!--                <tr>-->
+<!--                    <td rowspan="5">Customers</td>-->
+
+<!--                    <td>-->
+<!--                       <button class="crudbutton" onClick="callApi('list_customers')">List All</button>-->
+<!--                    </td>-->
+<!--                </tr>-->
+<!--                <tr><td>Search</td></tr>-->
+<!--                <tr><td>New</td></tr>-->
+<!--                <tr><td>Update</td></tr>-->
+<!--                <tr><td>Delete</td></tr>-->
+<!--                </tbody>-->
+<!--            </table>-->
+
+        </div>
+
+        <div id="Querying" class="tab" style="display:none">
+            Querying
+            <p>Locating one or more records in a table using search parameters</p>
+        </div>
+
+        <div id="Joins" class="tab" style="display:none">
+            Joins
+            <p>Combining data from multiple tables</p>
+        </div>
+
+        <div id="Multi-step" class="tab" style="display:none">
+            Multi-step
+            <p>Multi-step actions involving reading & writing, such as
+               <pre> UPDATE MyTable<br/> WHERE (subquery is true) </pre>
+            </p>
+        </div>
+
+        <br/>
+        <div id="gridDiv">
+            <table id="grid" >
+            </table>
+        </div>
+    </div>
+
+    <div id="debug"></div>
+
+</div>
+
+
+</body>
+</html>
