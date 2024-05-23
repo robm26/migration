@@ -5,11 +5,11 @@ def row_maker(tick):
 
     row = {
         'cust_id': pk,
-        'name': 'Luna',
-        'email': 'luna@dog.com',
+        'name': 'ACME',
+        'email': 'sam@acme.com',
         'phone': '508-555-1212',
         'credit_rating': 675,
-        'last_updated': '2024-05-02'
+        'last_updated': '2024-06-02'
     }
 
     return row

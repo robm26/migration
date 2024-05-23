@@ -1,1 +1,1 @@
-MESSAGE = 'Hello Luna'
+MESSAGE = 'Hello World'

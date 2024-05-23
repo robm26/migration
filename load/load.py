@@ -4,6 +4,7 @@ from botocore.exceptions import ClientError
 import mysql.connector
 from datetime import datetime, timedelta
 import sys
+import os
 import importlib
 
 
@@ -22,6 +23,10 @@ if "MYSQL_USERNAME" in os.environ:
 if "MYSQL_PASSWORD" in os.environ:
     mysql_password = os.environ['MYSQL_PASSWORD']
 
+# print('mysql_host', mysql_host)
+# print('mysql_db', mysql_db)
+# print('mysql_username', mysql_username)
+# print()
 
 job_file = 'job1.py'
 ddb_local = False
@@ -85,8 +90,13 @@ def main(dynamodb=None, mysql_conn=None):
             insert2 =  list(rowvals)
 #             print(insert1)
 #             print(insert2)
-            mysql_cur.execute(insert1, insert2)
-            mysql_conn.commit()
+            try:
+                mysql_cur.execute(insert1, insert2)
+                mysql_conn.commit()
+
+            except Exception as e:
+                print(e)
+
 
     if(job_info['db'] == 'mysql'):
         mysql_cur.close()

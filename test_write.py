@@ -7,14 +7,18 @@ testpath = '/'
 
 # testpath = '/scan'
 # testpath = '/list_customers'
-testpath = '/add_customer'
+testpath = '/new_record/Customers'
 
 epoch_time = int(time.time())
 
 post_data = {
     'cust_id': 'cust-' + str(epoch_time),
-    'name':'Luna',
-    'city':'Rangeley'
+    'name': 'Standard',
+    'email': 'admin@bu.edu',
+    'phone': '555-1234',
+    'region': 'Northeast',
+    'credit_rating': 354,
+    'last_updated': '2024-05-22'
 }
 
 

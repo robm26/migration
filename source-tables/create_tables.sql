@@ -2,7 +2,6 @@ CREATE DATABASE IF NOT EXISTS app_db;
 
 USE app_db;
 
-
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS OrderLines;
 DROP TABLE IF EXISTS CustomerLedger;
@@ -15,12 +14,15 @@ CREATE TABLE Customers (
   name varchar(20) NOT NULL,
   email varchar(50) NOT NULL,
   phone varchar(30) NULL,
+  region varchar(30) NOT NULL,
   credit_rating int(10) NOT NULL,
   last_updated datetime NOT NULL,
   
   CONSTRAINT idx_cust_pk PRIMARY KEY (cust_id),
   INDEX idx_email (email),
-  INDEX idx_phone (phone)
+  INDEX idx_phone (phone),
+  INDEX idx_credit_rating (credit_rating),
+  INDEX idx_region_credit_rating (region, credit_rating)
 );
 
 CREATE TABLE Products (

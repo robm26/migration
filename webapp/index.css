@@ -56,9 +56,10 @@ button {
 #apiTitle {
     padding-left:10px;
     padding:5px;
-    background-color:#eee;
-    font-size:smaller;
+    background-color:whitesmoke;
+    font-size:x-small;
     border-radius:5px;
+    color:grey;
 }
 .tabActive {
     background-color:gainsboro;
@@ -99,7 +100,7 @@ button {
 }
 
 .tablePanel {
-    background-color:silver;
+    background-color:lightgray;
     margin-left:10px;
     border-spacing: 0;
     border-radius:5px;
@@ -155,8 +156,12 @@ button {
 }
 
 #tableDetails {
+    background-color:#D3D3D3;
+    padding:5px;
 
 }
+
+
 #tableDetailsTable {
 
 }
@@ -167,4 +172,60 @@ button {
     padding-top:5px;
     padding-right:10px;
     display:flex;
+}
+#setApiButton {
+    border: 1px solid silver;
+    background-color:whitesmoke;
+}
+#debug {
+    background-color: lightsteelblue;
+    padding:5px;
+}
+.grid1 {
+    border-radius:10px;
+    border-collapse: collapse;
+}
+.grid1 td {
+    border:1px solid dimgray;
+    font-size:smaller;
+    color:#333;
+}
+.gridHeader {
+    padding:4px;
+}
+.gridData {
+    background-color: silver;
+    padding:3px;
+
+}
+.crudMainPanel {
+    vertical-align:top;
+}
+.newItemForm {
+    background-color:gray;
+    border-collapse: collapse;
+}
+.newItemForm td {
+    border: 1px solid dimgray;
+}
+
+.formSubmitCell {
+    padding:3px;
+    background-color: lightgray;
+    padding-top:8px;
+    border:1px solid lightgray !important;
+}
+.formSubmitButton {
+    float:right;
+    border:1px solid dimgray;
+    background-color:gainsboro;
+    color:dimgray;
+
+}
+input {
+    background-color:gainsboro;
+    border:none;
+    border-radius:4px;
+    margin:2px;
+    color:dimgray;
 }

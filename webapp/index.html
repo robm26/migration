@@ -17,6 +17,7 @@
     </style>
     <script src="./index.js" defer></script>
     <script src="./api.js" defer></script>
+    <script src="./form.js" defer></script>
 
 </head>
 <body class="indexbody" onLoad="renderNav()">
@@ -25,7 +26,7 @@
 
         &nbsp;&nbsp;&nbsp;<a href="" target=_blank class="titlelink">Database Application</a>
         &nbsp;&nbsp;
-        <button id="sampleAPI1"
+        <button id="setApiButton"
                 onClick="setCookie(prompt('Sample API', 'https://g4zp6m9brf.execute-api.us-east-2.amazonaws.com/api/'))">
             Target API</button>
         &nbsp;&nbsp;
@@ -52,19 +53,32 @@
             <br/><br/>
 
             <table class="tablePanel">
-                <tr><td colspan="2">
-                    <button class="tablesButton" onClick="listTables()">Tables</button>
-                </td>
-                    <tr><td id="tableListTd">
-                        <table id="tableList"></table>
-                    </td>
+                <tr>
                     <td>
+                        <button class="tablesButton" onClick="listTables()">Tables</button>
+                    </td>
+                    <td rowspan="2" class="crudMainPanel">
                         <div id="tableDetails">
-                            <table id="tableDetailsTable">
 
+                            <table id="tableCrudButtons"></table>
+                            <br/>
+                            <div id="gridDiv">
+                                <table id="grid1" ></table>
+                                <form id="formItem" method="post" action=""  onsubmit="preventDefault();">
+                                    <table id="tblForm" ></table>
+                                </form>
+                                <table id="tblItem" ></table>
+
+                            </div>
+                            <table id="tableDetailsTable">
                             </table>
                         </div>
                     </td>
+                <tr>
+                    <td id="tableListTd">
+                        <table id="tableList"></table>
+                    </td>
+
                 </tr>
 
             </table>
@@ -106,13 +120,11 @@
         </div>
 
         <br/>
-        <div id="gridDiv">
-            <table id="grid" >
-            </table>
-        </div>
+
     </div>
 
-    <div id="debug"></div>
+<!--    <button  onclick="showSessionStorage();" >debug</button><br/>-->
+<!--    <div id="debug"></div>-->
 
 </div>
 
