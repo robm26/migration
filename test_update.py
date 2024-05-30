@@ -5,22 +5,23 @@ import time
 
 testpath = '/'
 
-# testpath = '/scan'
-# testpath = '/list_customers'
-testpath = '/new_record/Customers'
 
-epoch_time = int(time.time())
-cust_id = 'cust-' + str(epoch_time)
-cust_id = 'c223'
+testpath = '/update_record/Customers'
+
+cust_id = 'c111'
 
 post_data = {
-    'cust_id': cust_id,
-    'name': 'Standard',
-    'email': 'admin@bc.edu',
-    'phone': '555-1234',
-    'region': 'West',
-    'credit_rating': 554,
-    'last_updated': '2024-06-15'
+    'recordKey': {
+        'cust_id': cust_id
+    },
+    'updateAttributes' : {
+        'name': 'Union',
+        'email': 'admin@bc.edu',
+        'phone': '555-1234',
+        'region': 'Northeast',
+        'credit_rating': 789,
+        'last_updated': '2024-06-18'
+    }
 }
 
 

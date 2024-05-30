@@ -8,7 +8,7 @@ mysql_db = "app_db"
 mysql_username = "admin"
 mysql_password = ""
 
-return_limit = 10
+return_limit = 20
 
 
 if "MYSQL_HOST" in os.environ:
@@ -27,6 +27,7 @@ mysql_conn = mysql.connector.connect(
   password=mysql_password,
   host=mysql_host
 )
+mysql_conn.autocommit = True
 
 mysql_cur = mysql_conn.cursor(buffered=True, dictionary=True)
 
@@ -60,33 +61,82 @@ def scan_table(table):
 
     mysql_cur.execute(request)
     result = mysql_cur.fetchall()
-    return format_sql_dataset(result)
+    # mysql_conn.commit()
+    dataset = format_sql_dataset(result)
+    print(dataset)
+
+    return dataset
 
 
 def new_record(table, record):
     insert_stmt = 'INSERT INTO ' + table + ' '
 
-    print(table)
     insert_stmt += '(' + ', '.join(list(record)) + ') '
     # If some elements in names aren't strings, use print(', '.join(map(str,name))) instead.
     insert_stmt += 'VALUES (' + ', '.join(["%s"] * len(list(record))) + ') '
-    # insert_stmt += 'VALUES (' + ', '.join(f'"{w}"' for w in list(record.values())) + ')'
-    print(insert_stmt)
     insert_values = list(record.values())
 
-#    print(list(insert_values))
-#     insert_stmt += '(cust_id, name, email, city, last_updated, rating) '
-#     insert_stmt += 'VALUES (%s, %s, %s, %s, %s, %s)'
-#     insert_values = [new_customer['cust_id'], new_customer['name'], 'pat@yahoo.com', new_customer['city'], '2024-02-01', 710]
+    try:
+        mysql_cur.execute(insert_stmt, insert_values)
+        mysql_conn.commit()
 
-    mysql_cur.execute(insert_stmt, insert_values)
+    except mysql.connector.IntegrityError as ie:
+        return({"status": "IntegrityError " + str(ie)})
+
+    return({"status":mysql_cur.rowcount})
+
+
+def update_record(table, request):
+
+    keyList = list(request['recordKey'].keys())
+    delete_condition = keyList[0] + ' = %s'
+
+    if len(keyList) > 1:
+        delete_condition += ' AND ' + keyList[1] + ' = %s'
+
+    key_vals = list(request['recordKey'].values())
+
+    update_attributes = list(request['updateAttributes'])
+    ua_keys = list(request['updateAttributes'].keys())
+    ua_vals = list(request['updateAttributes'].values())
+
+    vals = ua_vals + key_vals
+
+    update_stmt = 'UPDATE ' + table + ' SET '
+
+    for ua_key in ua_keys:
+        update_stmt += ua_key + ' = %s, '
+    update_stmt = update_stmt[:-2] + ' '
+
+    update_stmt += 'WHERE ' + delete_condition
+#     print(update_stmt)
+#     print(vals)
+
+    mysql_cur.execute(update_stmt, vals)
+    mysql_conn.commit()
+#
+#     return({"status":mysql_cur.rowcount})
+    return({"status": mysql_cur.rowcount})
+
+
+def delete_record(table, recordKey):
+    keyList = list(recordKey.keys())
+    deleteCondition = keyList[0] + ' = %s'
+
+    if len(keyList) > 1:
+        deleteCondition += ' AND ' + keyList[1] + ' = %s'
+
+    key_vals = list(recordKey.values())
+
+    delete_stmt = 'DELETE FROM ' + table + ' '
+
+    delete_stmt += 'WHERE ' + deleteCondition
+    print(delete_stmt)
+
+    mysql_cur.execute(delete_stmt, key_vals)
     mysql_conn.commit()
 
-#     mysql_cur.close()
-#     mysql_conn.close()
-
-    return({"status":"success"})
-
+    return({"status":mysql_cur.rowcount})
 
 def format_sql_dataset(dataset):
     formatted_dataset = []

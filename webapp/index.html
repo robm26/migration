@@ -39,6 +39,8 @@
     </div>
     <br/>
     <div id="bodycontent">
+        <input type="hidden" name="tableName" id="tableName" value="tableName" />
+        <input type="hidden" name="tableMetadata" id="tableMetadata" value="tableMetadata" />
 
         <div class="" id="tabs">
             &nbsp;&nbsp;Access pattern:
@@ -61,10 +63,11 @@
                         <div id="tableDetails">
 
                             <table id="tableCrudButtons"></table>
+                            <div id="callStatusDiv" class="callStatusDiv"></div>
                             <br/>
                             <div id="gridDiv">
                                 <table id="grid1" ></table>
-                                <form id="formItem" method="post" action=""  onsubmit="preventDefault();">
+                                <form id="formItem" method="post" action=""  onsubmit="return false;">
                                     <table id="tblForm" ></table>
                                 </form>
                                 <table id="tblItem" ></table>

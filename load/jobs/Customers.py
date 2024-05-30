@@ -19,7 +19,7 @@ def job_info():
     job_params = {
         'db': 'mysql',
         'table': 'app_db.Customers',
-        'row_count': 7,
+        'row_count': 3,
     }
     return job_params
 

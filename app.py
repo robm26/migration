@@ -4,8 +4,9 @@ import json
 from chalice import Chalice
 from chalicelib import mysql_calls as db
 # from chalicelib import dynamodb_calls as db
-import mysql.connector
 
+import mysql.connector
+import logging
 
 import boto3
 from botocore.exceptions import ClientError
@@ -17,7 +18,6 @@ region = "us-east-2"
 if "AWS_DEFAULT_REGION" in os.environ:
     region = os.environ['AWS_DEFAULT_REGION']
 
-
 @app.route('/', methods=['GET'], cors=True)
 def ping():
     return {'ping': 'ok'}
@@ -25,6 +25,10 @@ def ping():
 
 @app.route('/list_tables', methods=['GET'], cors=True)
 def list_tables():
+    print('*** app.current_request')
+    request = app.current_request
+    print(request.to_dict())
+
     return db.list_tables()
 
 
@@ -38,10 +42,17 @@ def desc_table(table):
     return db.scan_table(table)
 
 
-@app.route("/new_record/{table}", methods=['POST'], cors=True)
+@app.route("/new_record/{table}", methods=['POST'], cors=True, content_types=['application/json'])
 def new_record(table):
     return db.new_record(table, app.current_request.json_body)
 
+@app.route("/update_record/{table}", methods=['POST'], cors=True, content_types=['application/json'])
+def update_record(table):
+    return db.update_record(table, app.current_request.json_body)
+
+@app.route("/delete_record/{table}", methods=['POST'], cors=True, content_types=['application/json'])
+def delete_record(table):
+    return db.delete_record(table, app.current_request.json_body)
 
 
 #     insert_stmt = 'INSERT INTO Customers '

@@ -1,7 +1,6 @@
 
 
 function setCookie(value) {
-    console.log('value ' + value);
 
     if(typeof value === 'object' || value.length === 0) {
         const apiTitle = document.getElementById('apiTitle');
@@ -95,6 +94,8 @@ async function listTables() {
 
 async function descTableClick(table) {
     clear('tblForm');
+    document.getElementById('tableName').innerHTML = table;
+
     const tableCrudButtons = document.getElementById('tableCrudButtons');
     tableCrudButtons.innerHTML = '';
     const row = tableCrudButtons.insertRow(-1);
@@ -115,6 +116,15 @@ async function descTableClick(table) {
     btn2.onclick = () => insertRowForm(table);
     cell2.appendChild(btn2);
 
+
+    // const cell3 = row.insertCell(-1);
+    // const btn3 = document.createElement('button');
+    // btn3.textContent = 'GET ITEM';
+    // btn3.className = "tableButton";
+    // btn3.id = 'btnInsert' + table;
+    // btn3.onclick = () => console.log('get item');
+    // cell3.appendChild(btn3);
+
     const resetButton = document.getElementsByClassName('tableButtonActive');
     if(resetButton.length>0) {
         resetButton[0].className = 'tableButton';
@@ -123,81 +133,36 @@ async function descTableClick(table) {
     const clickedButton = document.getElementById('btn' + table);
     clickedButton.className = 'tableButtonActive';
 
-    let AttributeDefinitions = [];
-    let KeySchema = [];
+    const descTableResult = await callApi('/desc_table/' + table);
 
-    const tableMetadata = await callApi('/desc_table/' + table);
+    const tableMetadata = formatMetadata(descTableResult, table);
 
-    fillGrid(tableMetadata, 'grid1');
+    document.getElementById('tableName').value = table;
+    document.getElementById('tableMetadata').value = JSON.stringify(tableMetadata);
 
-    //
-    // let tableDetailsTable = document.getElementById("tableDetailsTable");
-    // tableDetailsTable.innerHTML = null;
-    //
-    //
-    //
-    //
-    // tableMetadata.forEach((col, rowIndex) => {
-    //
-    //     const attrs = Object.keys(col);
-    //
-    //     if(rowIndex === 1) {
-    //         const gridHeader = tableDetailsTable.createTHead();
-    //         const row0 = gridHeader.insertRow(0);
-    //         attrs.forEach((col) => {
-    //             const cell0 = row0.insertCell(-1);
-    //             cell0.className = "metadataHeader";
-    //             cell0.innerHTML = col;
-    //         });
-    //
-    //     }
-    //     const row = tableDetailsTable.insertRow(-1);
-    //     attrs.forEach((attr, attrIndex) => {
-    //
-    //         const cell1 = row.insertCell(-1);
-    //         cell1.className = "metadataData";
-    //         cell1.innerHTML = col[attr];
-    //     });
-    //
-    // });
-
-    let tableMetadataJSON = {
-        "Table": {
-            "TableName": table,
-            "AttributeDefinitions": AttributeDefinitions,
-            "KeySchema": KeySchema
-        }
-    };
-
-    // console.log(tableMetadataJSON);
-
-    // console.log(JSON.stringify(tableMetadata, null, 2));
-    // document.getElementById('debug').innerHTML = JSON.stringify(tableMetadata, null, 2);
+    tableSchemaGrid(tableMetadata, 'grid1');
 
 }
 
 async function scanTable(table) {
-    // console.log('scanTable() called for ' + table);
+
     clear('tblForm');
+    log(null);
 
     const scanData = await callApi('/scan_table/' + table);
+    const tableMetadata = document.getElementById('tableMetadata').value;
 
-    fillGrid(scanData, 'grid1');
-
-}
-
-
-function showSessionStorage() {
-
-    sessionStorage.setItem("lastname", "Smith");
-    sessionStorage.setItem("firstname", "Michelle");
-
-    console.log('set lastname: Smith');
-
-    let debug = document.getElementById('debug');
-
-    debug.innerHTML = Object.keys(sessionStorage);
-    // sessionStorage.setItem("lastname", "Smith");
-    // sessionStorage.getItem("lastname");
+    fillGrid(scanData, 'grid1', table, tableMetadata);
 
 }
+
+function log(msg, status) {
+    let logDiv = document.getElementById('callStatusDiv');
+    if(msg) {
+        logDiv.style.visibility = 'visible';
+    } else {
+        logDiv.style.visibility = 'hidden';
+    }
+    logDiv.innerHTML = msg;
+}
+

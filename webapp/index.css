@@ -184,6 +184,7 @@ button {
 .grid1 {
     border-radius:10px;
     border-collapse: collapse;
+    font-size:larger;
 }
 .grid1 td {
     border:1px solid dimgray;
@@ -208,7 +209,9 @@ button {
 .newItemForm td {
     border: 1px solid dimgray;
 }
-
+#formItem {
+    background-color: lightgray;
+}
 .formSubmitCell {
     padding:3px;
     background-color: lightgray;
@@ -228,4 +231,18 @@ input {
     border-radius:4px;
     margin:2px;
     color:dimgray;
+}
+.callStatus {
+    padding-top:5px;
+    padding-left:15px;
+}
+
+.callStatusDiv {
+    padding:2px;
+    padding-left:5px;
+    margin-top:5px;
+    margin-left:20px;
+    background-color: #e0e0bf;
+    border-radius:5px;
+    visibility: hidden;
 }

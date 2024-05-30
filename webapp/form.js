@@ -1,21 +1,33 @@
 
-async function insertRowForm(table) {
+async function insertRowForm(table, itemKey, existingItem) {
 
     clear('grid1');
     clear('tblForm');
+    log(null);
 
-    const tableMetadata = await callApi('/desc_table/' + table);
+    let item = existingItem || {};
+
+    // const tableMetadata = await callApi('/desc_table/' + table);
+    const tableMetadata = JSON.parse(document.getElementById('tableMetadata').value);
+
+    const AttributeDefinitions = tableMetadata['Table']['AttributeDefinitions'];
+    const KeySchema = tableMetadata['Table']['KeySchema'];
 
     let myTable = document.getElementById('tblForm');
     myTable.className = 'newItemForm';
 
-    tableMetadata.forEach((item, index) => {
+    let colPrimary = true;
+
+    AttributeDefinitions.forEach((item, index) => {
+
+        if(index >= KeySchema.length) {
+            colPrimary = false;
+        }
         const cols = Object.keys(item);
 
         const row = myTable.insertRow(-1);
         let colType = 'string';
         let colName = '';
-        let colPrimary = true;
 
         cols.forEach((col, index2) => {
 
@@ -25,11 +37,8 @@ async function insertRowForm(table) {
                 cell1.innerHTML = item[col];
                 colName = item[col];
             }
+
             if(index2 === 1) {
-                console.log(item[col]);
-                colPrimary = item[col] === 'PRI'; // boolean
-            }
-            if(index2 === 2) {
                 const cell2 = row.insertCell(-1);
                 cell2.className = "gridData";
                 cell2.innerHTML = item[col];
@@ -41,22 +50,32 @@ async function insertRowForm(table) {
                 }
             }
         });
+
         const cell3 = row.insertCell(-1);
         cell3.className = "gridData";
 
-        const input = document.createElement('input');
-        input.type = "text";
-        if(colPrimary)  {
-            let uniqueNumber = Date.now().toString().slice(4,10);
-            input.value = colName + '-' + uniqueNumber;
+        if(existingItem && itemKey && colName in itemKey) {
+            cell3.innerHTML = existingItem[colName];
         } else {
-            if(colType === 'int') {input.value = 123; }
-            if(colType === 'datetime') {input.value = '2024-06-15'; }
-            if(colType === 'string') {input.value = 'abc'; }
+            const input = document.createElement('input');
+            input.type = "text";
+            input.name = colName;
+
+            if(existingItem && colName in existingItem) {
+                input.value = existingItem[colName];
+            } else {
+                if(colPrimary)  {
+                    let uniqueNumber = Date.now().toString().slice(4,10);
+                    input.value = colName + '-' + uniqueNumber;
+                } else {
+                    if(colType === 'int') {input.value = 123; }
+                    if(colType === 'datetime') {input.value = '2024-06-15'; }
+                    if(colType === 'string') {input.value = 'abc'; }
+                }
+            }
+
+            cell3.appendChild(input);
         }
-
-
-        cell3.appendChild(input);
 
     });
 
@@ -67,7 +86,11 @@ async function insertRowForm(table) {
     const button = document.createElement("button");
     button.className = "formSubmitButton";
 
-    button.onclick = () => insert({});
+    if(existingItem) {  //update
+        button.onclick = () => update(table, itemKey,'formItem');
+    } else {
+        button.onclick = () => insert(table, 'formItem');
+    }
 
     button.appendChild(document.createTextNode("SAVE"));
     cellF1.appendChild(button);
@@ -75,18 +98,59 @@ async function insertRowForm(table) {
 }
 
 
-async function insert(table, row) {
-    console.log('in insert');
+async function insert(table, formName) {
+    const formItem = document.getElementById(formName);
+    const formValues = formItem.querySelectorAll( "input" );
+    let formValuesJSON = {};
 
-    const formItem = document.getElementById('formItem');
-    const formData = new FormData(formItem);
+    formValues.forEach((field, idx) => {
+        formValuesJSON[field.name] = field.value;
+    });
 
-    const response = await postApi('/new_record/' + table, formData);
+    const response = await postApi('/new_record/' + table, formValuesJSON);
+    const responseJSON = await response.json();
 
-    console.log('insertRow() called for ' + table);
-    console.log('row ' + row);
-    console.log('response :');
-    console.log(response);
+    if(responseJSON['status'] === 1) {
+        log('1 record inserted');
+    } else {
+        log(responseJSON['status']);
+    }
+}
+
+async function update(table, recordKey, formName) {
+    const formItem = document.getElementById(formName);
+    const formValues = formItem.querySelectorAll( "input" );
+    let formValuesJSON = {};
+
+    formValues.forEach((field, idx) => {
+        formValuesJSON[field.name] = field.value;
+    });
+
+    const updateRequest = {
+        "recordKey": recordKey,
+        "updateAttributes": formValuesJSON
+    };
+
+    const response = await postApi('/update_record/' + table, updateRequest);
+    const responseJSON = await response.json();
+
+    if(responseJSON['status'] === 1) {
+        log('1 record written');
+    } else {
+        log(JSON.stringify(responseJSON));
+    }
+}
+
+async function deleteItem(table, recordKey) {
+
+    const response = await postApi('/delete_record/' + table, recordKey);
+    const responseJSON = await response.json();
+
+    if(responseJSON['status'] === 1) {
+        log('1 record deleted');
+    } else if(responseJSON['status'] === 0) {
+        log('0 records deleted');
+    }
 
 }
 
