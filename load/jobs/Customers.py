@@ -5,8 +5,8 @@ def row_maker(tick):
 
     row = {
         'cust_id': pk,
-        'name': 'ACME',
-        'email': 'sam@acme.com',
+        'name': 'Company' + tick,
+        'email': 'sam@company' + tick + '.com',
         'phone': '508-555-1212',
         'credit_rating': 675,
         'last_updated': '2024-06-02'

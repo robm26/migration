@@ -61,8 +61,10 @@
                     </td>
                     <td rowspan="2" class="crudMainPanel">
                         <div id="tableDetails">
+                            <form id="formQuery" method="post" action="" onsubmit="return false;">
+                                <table id="tableCrudButtons"></table>
+                            </form>
 
-                            <table id="tableCrudButtons"></table>
                             <div id="callStatusDiv" class="callStatusDiv"></div>
                             <br/>
                             <div id="gridDiv">
@@ -108,6 +110,16 @@
         <div id="Querying" class="tab" style="display:none">
             Querying
             <p>Locating one or more records in a table using search parameters</p>
+
+            <table class="tablePanel">
+                <tr>
+                    <td>
+                        <button class="tablesButton" onClick="listTables()">Tables</button>
+                    </td>
+                </tr>
+
+            </table>
+
         </div>
 
         <div id="Joins" class="tab" style="display:none">

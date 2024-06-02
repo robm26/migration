@@ -41,6 +41,9 @@ def desc_table(table):
 def desc_table(table):
     return db.scan_table(table)
 
+@app.route('/get_record/{table}', methods=['POST'], cors=True, content_types=['application/json'])
+def get_record(table):
+    return db.get_record(table, app.current_request.json_body)
 
 @app.route("/new_record/{table}", methods=['POST'], cors=True, content_types=['application/json'])
 def new_record(table):

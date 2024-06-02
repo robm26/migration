@@ -53,7 +53,7 @@ def desc_table(table):
 
 
 def scan_table(table):
-    limit = 10
+    limit = 100
     request = "SELECT * "
     request += "FROM " + mysql_db + "." + table + " "
     request += "LIMIT " + str(limit)
@@ -61,9 +61,27 @@ def scan_table(table):
 
     mysql_cur.execute(request)
     result = mysql_cur.fetchall()
-    # mysql_conn.commit()
     dataset = format_sql_dataset(result)
     print(dataset)
+
+    return dataset
+
+
+def get_record(table, request):
+
+    keyList = list(request['recordKey'].keys())
+    sql_condition = keyList[0] + ' = %s'
+
+    if len(keyList) > 1:
+        sql_condition += ' AND ' + keyList[1] + ' = %s'
+
+    key_vals = list(request['recordKey'].values())
+
+    get_stmt = 'SELECT * FROM ' + table + ' WHERE ' + sql_condition
+
+    mysql_cur.execute(get_stmt, key_vals)
+    result = mysql_cur.fetchall()
+    dataset = format_sql_dataset(result)
 
     return dataset
 
@@ -78,7 +96,6 @@ def new_record(table, record):
 
     try:
         mysql_cur.execute(insert_stmt, insert_values)
-        mysql_conn.commit()
 
     except mysql.connector.IntegrityError as ie:
         return({"status": "IntegrityError " + str(ie)})
@@ -109,13 +126,9 @@ def update_record(table, request):
     update_stmt = update_stmt[:-2] + ' '
 
     update_stmt += 'WHERE ' + delete_condition
-#     print(update_stmt)
-#     print(vals)
 
     mysql_cur.execute(update_stmt, vals)
-    mysql_conn.commit()
-#
-#     return({"status":mysql_cur.rowcount})
+
     return({"status": mysql_cur.rowcount})
 
 
@@ -134,7 +147,6 @@ def delete_record(table, recordKey):
     print(delete_stmt)
 
     mysql_cur.execute(delete_stmt, key_vals)
-    mysql_conn.commit()
 
     return({"status":mysql_cur.rowcount})
 

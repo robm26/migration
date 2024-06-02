@@ -5,22 +5,26 @@ async function insertRowForm(table, itemKey, existingItem) {
     clear('tblForm');
     log(null);
 
-    let item = existingItem || {};
+    // let item = existingItem || {};
 
-    // const tableMetadata = await callApi('/desc_table/' + table);
     const tableMetadata = JSON.parse(document.getElementById('tableMetadata').value);
 
-    const AttributeDefinitions = tableMetadata['Table']['AttributeDefinitions'];
-    const KeySchema = tableMetadata['Table']['KeySchema'];
+    const ADs = tableMetadata['Table']['AttributeDefinitions'];
+    const Ks = tableMetadata['Table']['KeySchema'];
+    const keyList = Ks.map((key) => key['AttributeName']);
+    let AdTypes = {};
+    ADs.map((ad) => {
+        AdTypes[ad['AttributeName']] = ad['AttributeType'];
+    });
 
     let myTable = document.getElementById('tblForm');
     myTable.className = 'newItemForm';
 
     let colPrimary = true;
 
-    AttributeDefinitions.forEach((item, index) => {
+    ADs.forEach((item, index) => {
 
-        if(index >= KeySchema.length) {
+        if(index >= Ks.length) {
             colPrimary = false;
         }
         const cols = Object.keys(item);
@@ -28,19 +32,34 @@ async function insertRowForm(table, itemKey, existingItem) {
         const row = myTable.insertRow(-1);
         let colType = 'string';
         let colName = '';
+        let rowClassName = 'gridData';
+
+        // if(colName === keyList[0]) {
+        //     rowClassName = "PK";
+        // }
+        // if(keyList.length > 1 && colName === keyList[1]) {
+        //     rowClassName = "SK";
+        // }
 
         cols.forEach((col, index2) => {
 
             if(index2 === 0) {
+                if(item[col] === keyList[0]) {
+                    rowClassName = "PK";
+                }
+                if(keyList.length > 1 && item[col] === keyList[1]) {
+                    rowClassName = "SK";
+                }
+
                 const cell1 = row.insertCell(-1);
-                cell1.className = "gridData";
+                cell1.className = rowClassName;
                 cell1.innerHTML = item[col];
                 colName = item[col];
             }
 
             if(index2 === 1) {
                 const cell2 = row.insertCell(-1);
-                cell2.className = "gridData";
+                cell2.className = rowClassName;
                 cell2.innerHTML = item[col];
                 if(item[col].slice(0, 3) === 'int') {
                     colType = 'int';
@@ -52,7 +71,8 @@ async function insertRowForm(table, itemKey, existingItem) {
         });
 
         const cell3 = row.insertCell(-1);
-        cell3.className = "gridData";
+
+        cell3.className = rowClassName;
 
         if(existingItem && itemKey && colName in itemKey) {
             cell3.innerHTML = existingItem[colName];
@@ -154,3 +174,14 @@ async function deleteItem(table, recordKey) {
 
 }
 
+async function query(table, conditions){
+
+    const response = await postApi('/query/' + table, conditions);
+    const responseJSON = await response.json();
+
+    let myTable = document.getElementById('tblQuery');
+
+
+    return {};
+
+}

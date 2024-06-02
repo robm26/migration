@@ -51,22 +51,21 @@ function fillGrid(data, grid, table, tableMetadata) {
     log(null);
     let myGrid = document.getElementById(grid);
     myGrid.className = grid;
-    if(data.length === 0) {
-        log('0 records');
-        // const row = myGrid.insertRow(-1);
-        // const cell1 = row.insertCell(-1);
-        // cell1.className = "gridData";
-        // cell1.innerHTML = "0 records";
+    if(data.length === 0) { log('0 records'); }
 
-    }
-    // let dataSetType = 'data';
-    // if(data.length > 0) {
-    //     if(Object.keys(data[0])[0] === 'COLUMN_NAME') {
-    //         dataSetType = 'descData';
-    //     }
-    // }
     data.forEach((item, index) => {
         const cols = Object.keys(item);
+
+        let ks = JSON.parse(tableMetadata)['Table']['KeySchema'];
+
+        let itemKey = {};
+        let pkName = ks[0]['AttributeName'];
+        let skName = ks.length > 1 ? ks[1]['AttributeName'] : null;
+
+        itemKey[pkName] =  item[pkName];
+        if(skName) {
+            itemKey[skName] =  item[skName];
+        }
 
         if(index === 1) { // show column names
 
@@ -74,7 +73,14 @@ function fillGrid(data, grid, table, tableMetadata) {
             const row0 = gridHeader.insertRow(0);
             cols.forEach((col) => {
                 const cell0 = row0.insertCell(-1);
-                cell0.className = "gridHeader";
+                if(col === pkName) {
+                    cell0.className = "PKheader";
+                } else if (col === skName) {
+                    cell0.className = "SKheader";
+                } else {
+                    cell0.className = "gridHeader";
+                }
+
                 cell0.innerHTML = col;
             });
 
@@ -86,8 +92,15 @@ function fillGrid(data, grid, table, tableMetadata) {
         const row = myGrid.insertRow(-1);
         cols.forEach((col) => {
             const cell1 = row.insertCell(-1);
-            cell1.className = "gridData";
-            cell1.innerHTML = item[col];
+            if(col === pkName) {
+                cell1.className = "PK";
+            } else if(col === skName) {
+                cell1.className = "SK";
+            } else {
+                cell1.className = "gridData";
+            }
+
+            cell1.innerHTML = item[col] ;
         });
 
         const cellD = row.insertCell(-1);
@@ -95,16 +108,7 @@ function fillGrid(data, grid, table, tableMetadata) {
 
         const button = document.createElement("button");
         button.className = "formSubmitButton";
-        let ks = JSON.parse(tableMetadata)['Table']['KeySchema'];
 
-        let itemKey = {};
-        let pkName = ks[0]['AttributeName'];
-        let skName = ks.length > 1 ? ks[1]['AttributeName'] : null;
-
-        itemKey[pkName] =  item[pkName];
-        if(skName) {
-            itemKey[skName] =  item[skName];
-        }
         button.onclick = () => deleteItem(table, itemKey);
 
         let buttonLabel = "delete";
@@ -144,32 +148,33 @@ function tableSchemaGrid(metadata, grid) {
     if(Ks.length>1) {
         cell1.rowSpan = 2;
     }
-    cell1.className = "gridData";
-    cell1.innerHTML = 'Keys';
+    cell1.className = "gridDataLabel";
+
+    cell1.innerHTML = Ks.length>1 ? 'Composite key': 'Primary key';
 
     const cell2 = row.insertCell(-1);
-    cell2.className = "gridData";
+    cell2.className = "PK";
     cell2.innerHTML = Ks[0]['AttributeName'];
 
     const cell3 = row.insertCell(-1);
-    cell3.className = "gridData";
+    cell3.className = "PK";
     cell3.innerHTML = AdTypes[Ks[0]['AttributeName']];
 
     if(Ks.length > 1) {
         const row = myGrid.insertRow(-1);
         const cell = row.insertCell(-1);
-        cell.className = "gridData";
+        cell.className = "SK";
         cell.innerHTML = Ks[1]['AttributeName'];
 
         const cell3 = row.insertCell(-1);
-        cell3.className = "gridData";
+        cell3.className = "SK";
         cell3.innerHTML = AdTypes[Ks[1]['AttributeName']];
     }
 
     const row2 = myGrid.insertRow(-1);
     const cell21 = row2.insertCell(-1);
     cell21.rowSpan = ADs.length;
-    cell21.className = "gridData";
+    cell21.className = "gridDataLabel";
     cell21.innerHTML = 'Columns';
 
     ADs.forEach((attr, idx) => {

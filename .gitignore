@@ -5,3 +5,4 @@ webapp/build/
 .chalice/deployments/
 .chalice/deployed/
 setenv.sh
+.chalice/config.json
