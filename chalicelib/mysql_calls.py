@@ -31,6 +31,10 @@ mysql_conn.autocommit = True
 
 mysql_cur = mysql_conn.cursor(buffered=True, dictionary=True)
 
+def engine():
+    return "MySQL"
+
+
 def list_tables():
     request = "SELECT table_name FROM information_schema.tables WHERE table_schema = '" + mysql_db + "'"
     mysql_cur.execute(request)

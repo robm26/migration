@@ -232,6 +232,10 @@ function formatMetadata (mdata, table) {
 }
 
 function clear(element) {
+    if(document.getElementById('generateResults')) {
+        document.getElementById('generateResults').style.display = 'none';
+    }
+
     let myElement = document.getElementById(element);
     myElement.innerHTML = '';
 

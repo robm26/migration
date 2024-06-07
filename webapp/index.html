@@ -39,11 +39,14 @@
     </div>
     <br/>
     <div id="bodycontent">
-        <input type="hidden" name="tableName" id="tableName" value="tableName" />
-        <input type="hidden" name="tableMetadata" id="tableMetadata" value="tableMetadata" />
+
+        <input type="hidden" name="tableName" id="tableName"  />
+        <input type="hidden" name="tableMetadata" id="tableMetadata"  />
+        <input type="hidden" name="dataset" id="dataset"  />
+        <input type="hidden" name="engine" id="engine" value="MySQLE" />
 
         <div class="" id="tabs">
-            &nbsp;&nbsp;Access pattern:
+            Access pattern:
             <button class="tabActive" onclick="openTab('CRUD')">CRUD</button>
             <button class="tabInactive" onclick="openTab('Querying')">Querying</button>
             <button class="tabInactive" onclick="openTab('Joins')">Joins</button>
@@ -56,8 +59,8 @@
 
             <table class="tablePanel">
                 <tr>
-                    <td>
-                        <button class="tablesButton" onClick="listTables()">Tables</button>
+                    <td class="tableButtonCell">
+                        <button class="tablesButton" id="tablesButton" onClick="listTables()">Tables</button>
                     </td>
                     <td rowspan="2" class="crudMainPanel">
                         <div id="tableDetails">
@@ -67,43 +70,33 @@
 
                             <div id="callStatusDiv" class="callStatusDiv"></div>
                             <br/>
+
                             <div id="gridDiv">
                                 <table id="grid1" ></table>
                                 <form id="formItem" method="post" action=""  onsubmit="return false;">
                                     <table id="tblForm" ></table>
                                 </form>
                                 <table id="tblItem" ></table>
-
                             </div>
-                            <table id="tableDetailsTable">
-                            </table>
                         </div>
+
+                        <div id="generateDiv" class="GenHidden">
+                            <button id="btnGenerate" onClick="generate()">GENERATE</button> DynamoDB Equivalent<br/>
+                            <div class="generateResults" id="generateResults">
+                                <textarea id="textGen" ></textarea>
+                            </div>
+
+                        </div>
+
                     </td>
+
                 <tr>
-                    <td id="tableListTd">
+                    <td id="tableListTd" class="tableButtonCell">
                         <table id="tableList"></table>
                     </td>
-
                 </tr>
 
             </table>
-            <br/>
-<!--            <table id="crud_table">-->
-<!--                <thead></thead>-->
-<!--                <tbody>-->
-<!--                <tr>-->
-<!--                    <td rowspan="5">Customers</td>-->
-
-<!--                    <td>-->
-<!--                       <button class="crudbutton" onClick="callApi('list_customers')">List All</button>-->
-<!--                    </td>-->
-<!--                </tr>-->
-<!--                <tr><td>Search</td></tr>-->
-<!--                <tr><td>New</td></tr>-->
-<!--                <tr><td>Update</td></tr>-->
-<!--                <tr><td>Delete</td></tr>-->
-<!--                </tbody>-->
-<!--            </table>-->
 
         </div>
 

@@ -20,7 +20,7 @@ if "AWS_DEFAULT_REGION" in os.environ:
 
 @app.route('/', methods=['GET'], cors=True)
 def ping():
-    return {'ping': 'ok'}
+    return {'engine': db.engine()}
 
 
 @app.route('/list_tables', methods=['GET'], cors=True)

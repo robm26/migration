@@ -167,6 +167,7 @@ button {
 }
 #tableList {
     display: table-cell;
+    vertical-align: top;
 }
 #tableListTd {
     padding-top:5px;
@@ -306,4 +307,42 @@ input {
     border:1px solid silver;
     width:80px;
 
+}
+
+#btnGenerate {
+    font-weight:bold;
+}
+
+.GenVisible {
+    visibility: visible;
+    background-color:silver;
+    margin-top:20px;
+    padding:10px;
+    border-radius:5px;
+    font-size:smaller;
+    color:dimgray;
+    /*visibility:hidden;*/
+}
+.GenHidden {
+    height:300px;
+    visibility:hidden;
+}
+#textGen {
+    background-color:lightgray;
+    color:#222222;
+    border:none;
+    border-radius:7px;
+    margin-top:10px;
+    height:200px;
+    width:500px;
+    padding:8px;
+}
+
+.tableButtonCell {
+    vertical-align: top;
+    height:30px;
+}
+
+.generateResults {
+    display:none;
 }

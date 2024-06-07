@@ -1,4 +1,5 @@
 
+const dateConversionType = 'string'; // int
 
 function setCookie(value) {
 
@@ -24,7 +25,7 @@ function setCookie(value) {
     renderNav();
 }
 
-function renderNav() {
+async function renderNav() {
 
     const apiTitle = document.getElementById('apiTitle');
     const bodycontent = document.getElementById('bodycontent');
@@ -41,6 +42,12 @@ function renderNav() {
         apiTitle.style.visibility = 'hidden';
         bodycontent.style.visibility = 'hidden';
     }
+
+    const rootTest = await callApi('/'); // smoke test to ensure API responds with {"engine":"xyz"}
+    const engine = rootTest['engine'];
+    document.getElementById('engine').value = engine;
+    document.getElementById('tablesButton').innerText = engine + ' tables';
+
 
 }
 
@@ -68,12 +75,14 @@ async function listTables() {
     clear('grid1');
     clear('tblForm');
     document.getElementById('tableCrudButtons').innerHTML = '';
+    document.getElementById('generateDiv').className = 'GenHidden';
 
     let tableListTable = document.getElementById("tableList");
-    let tableDetailsTable = document.getElementById("tableDetailsTable");
+    // let tableDetailsTable = document.getElementById("tableDetailsTable");
 
     tableListTable.innerHTML = null;
-    tableDetailsTable.innerHTML = null;
+    // tableDetailsTable.innerHTML = null;
+    // document.getElementById('generate').innerHTML = null;
 
     const list = await callApi('/list_tables');
 
@@ -94,6 +103,7 @@ async function listTables() {
 
 async function descTableClick(table) {
     clear('tblForm');
+    document.getElementById('dataset').value = null;
 
     const descTableResult = await callApi('/desc_table/' + table);
     const tableMetadata = formatMetadata(descTableResult, table);
@@ -189,6 +199,8 @@ async function descTableClick(table) {
 
     tableSchemaGrid(tableMetadata, 'grid1');
 
+    document.getElementById('generateDiv').className = 'GenVisible';
+
 }
 
 async function scanTable(table) {
@@ -197,6 +209,9 @@ async function scanTable(table) {
     log(null);
 
     const scanData = await callApi('/scan_table/' + table);
+
+    document.getElementById('dataset').value = JSON.stringify(scanData);
+
     const tableMetadata = document.getElementById('tableMetadata').value;
 
     fillGrid(scanData, 'grid1', table, tableMetadata);
@@ -214,17 +229,55 @@ async function getItem(table, formName) {
         formValuesJSON[field.name] = field.value;
     });
     const request = {"recordKey": formValuesJSON};
-    console.log(request);
 
     const response = await postApi('/get_record/' + table, request);
     const responseJSON = await response.json();
-    console.log('got item');
-    console.log(JSON.stringify(responseJSON, null, 2));
+
     if(responseJSON.length === 0) {
         log('item not found');
     } else {
+        document.getElementById('dataset').value = JSON.stringify(responseJSON);
         insertRowForm(table, formValuesJSON, responseJSON[0]);
     }
+
+    return {};
+}
+
+function generate() {
+
+    const textBox = document.getElementById('textGen');
+    const tableMetadata = document.getElementById('tableMetadata').value;
+    const dataset =  document.getElementById('dataset').value;
+    console.log('*' + typeof dataset + '*');
+
+    let generateType = 'table';
+
+    if(dataset.length > 0) {
+        console.log(dataset);
+        if(JSON.parse(dataset).length === 1) {
+            generateType = 'record';
+        } else {
+            generateType = 'dataset';
+        }
+    }
+
+    const tmdFormatted = {
+        "Table": {
+            "TableName": "abc",
+            "KeySchema": [],
+            "AttributeDefinitions": []
+        }
+    };
+    tmdFormatted['Table']['TableName'] = JSON.parse(tableMetadata)['Table']['TableName'];
+    tmdFormatted['Table']['KeySchema'] = JSON.parse(tableMetadata)['Table']['KeySchema'];
+    tmdFormatted['Table']['AttributeDefinitions'] = JSON.parse(tableMetadata)['Table']['AttributeDefinitions'];
+
+    textBox.value = generateType;
+    // textBox.value = JSON.stringify(tmdFormatted, null, 2);
+
+    document.getElementById('generateResults').style.display = 'block';
+
+    // document.getElementById('dataset').value;
 
     return {};
 }
