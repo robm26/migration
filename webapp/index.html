@@ -18,6 +18,7 @@
     <script src="./index.js" defer></script>
     <script src="./api.js" defer></script>
     <script src="./form.js" defer></script>
+    <script src="./generate.js" defer></script>
 
 </head>
 <body class="indexbody" onLoad="renderNav()">
@@ -43,89 +44,121 @@
         <input type="hidden" name="tableName" id="tableName"  />
         <input type="hidden" name="tableMetadata" id="tableMetadata"  />
         <input type="hidden" name="dataset" id="dataset"  />
-        <input type="hidden" name="engine" id="engine" value="MySQLE" />
+        <input type="hidden" name="engine" id="engine" value="MySQL" />
+        <input type="hidden" name="tab" id="tab" value="CRUD" />
 
-        <div class="" id="tabs">
-            Access pattern:
-            <button class="tabActive" onclick="openTab('CRUD')">CRUD</button>
-            <button class="tabInactive" onclick="openTab('Querying')">Querying</button>
-            <button class="tabInactive" onclick="openTab('Joins')">Joins</button>
-            <button class="tabInactive" onclick="openTab('Multi-step')">Multi-step</button>
-        </div>
 
-        <div id="CRUD" class="tab" style="display:block">
-            Create, Read, Update, & Delete, the four basic database table operations.
-            <br/><br/>
+        <div style="width: 100%; display: table;" id="leftNavDivPanel">
+            <div style="display: table-row">
+                <div style="display: table-cell" ></div>
+                <div style="display: table-cell" >
+                    <div class="" id="tabs">
+                        Access pattern:
+                        <button class="tabActive" onclick="openTab('CRUD')">CRUD</button>
+                        <button class="tabInactive" onclick="openTab('Querying')">Querying</button>
+                        <button class="tabInactive" onclick="openTab('Joins')">Joins</button>
+                        <button class="tabInactive" onclick="openTab('Multi-step')">Multi-step</button>
+                    </div>
+                </div>
 
-            <table class="tablePanel">
-                <tr>
-                    <td class="tableButtonCell">
-                        <button class="tablesButton" id="tablesButton" onClick="listTables()">Tables</button>
-                    </td>
-                    <td rowspan="2" class="crudMainPanel">
-                        <div id="tableDetails">
-                            <form id="formQuery" method="post" action="" onsubmit="return false;">
-                                <table id="tableCrudButtons"></table>
+            </div>
+
+            <div style="display: table-row">
+                <div style="width: 10%; display: table-cell;" id="leftNavDiv">
+                    <button class="tablesButton" id="tablesButton" onClick="listTables()">Tables</button>
+                    <table id="leftNavTable"></table>
+                </div>
+
+                <div style="display: table-cell;">
+                    <div id="CRUD" class="tab" style="display:block">
+                        Create, Read, Update, & Delete, the four basic database table operations.
+                        <br/><br/>
+
+                        <table class="tablePanel">
+                            <tr>
+                                <td rowspan="2" class="crudMainPanel">
+                                    <div id="tableDetails">
+                                        <form id="formQuery" method="post" action="" onsubmit="return false;">
+                                            <table id="tableCrudButtons"></table>
+                                        </form>
+
+                                        <div id="log" class="log"></div>
+                                        <br/>
+
+                                        <div id="gridDiv" class="gridDiv">
+                                            <table id="grid1" ></table>
+                                            <form id="formItem" method="post" action=""  onsubmit="return false;">
+                                                <table id="tblForm" ></table>
+                                            </form>
+                                            <table id="tblItem" ></table>
+                                        </div>
+                                    </div>
+
+                                    <div id="generateDiv" class="GenHidden">
+                                        <button id="btnGenerate" onClick="generate()">GENERATE</button>
+                                        <span id="generateType"></span>
+                                        <br/>
+                                        <br/>
+                                        <div class="generateResults" id="generateResults">
+                                            <button id="btnCopy" onClick="copyText()">COPY</button><br/>
+                                            <textarea id="textGen" ></textarea>
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                            <tr>
+                                <td id="tableListTd" class="tableButtonCell">
+                                    <table id="tableList"></table>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+
+                    <div id="Querying" class="tab" style="display:none">
+                        Querying
+                        <p>Locating one or more records in a table using search parameters. <br/>Querying using an indexed key is fast and efficient. </p>
+
+                        <div>
+                            <form id="formQuerying" method="post" action="" onsubmit="return false;">
+                                <table id="indexSummary" class="indexSummary"></table>
+                                <br/>
+                                <div class="sqlPanel" >
+                                    <button class="sqlButton" onClick="runsql()">RUN SQL</button>
+                                    <button class="sqlButtonClear" onClick="clearsql()">CLEAR</button>
+                                    <span id="sampleButtons">
+
+                                    </span>
+
+                                    <div id="log2" class="log">log2</div>
+
+                                    <textarea id="sqlText" class="sqlText">SELECT prod_id, name, category, list_price FROM Products LIMIT 3</textarea>
+                                </div>
                             </form>
-
-                            <div id="callStatusDiv" class="callStatusDiv"></div>
-                            <br/>
-
-                            <div id="gridDiv">
-                                <table id="grid1" ></table>
-                                <form id="formItem" method="post" action=""  onsubmit="return false;">
-                                    <table id="tblForm" ></table>
-                                </form>
-                                <table id="tblItem" ></table>
-                            </div>
                         </div>
+                        <table id="sqlGrid" class="gridDiv"></table>
 
-                        <div id="generateDiv" class="GenHidden">
-                            <button id="btnGenerate" onClick="generate()">GENERATE</button> DynamoDB Equivalent<br/>
-                            <div class="generateResults" id="generateResults">
-                                <textarea id="textGen" ></textarea>
-                            </div>
+                    </div>
 
-                        </div>
+                    <div id="Joins" class="tab" style="display:none">
+                        Joins
+                        <p>Combining data from multiple tables</p>
+                    </div>
 
-                    </td>
+                    <div id="Multi-step" class="tab" style="display:none">
+                        Multi-step
+                        <p>Multi-step actions involving reading & writing, such as
+                        <pre> UPDATE MyTable<br/> WHERE (subquery is true) </pre>
+                        </p>
+                    </div>
 
-                <tr>
-                    <td id="tableListTd" class="tableButtonCell">
-                        <table id="tableList"></table>
-                    </td>
-                </tr>
-
-            </table>
-
+                </div>
+            </div>
         </div>
 
-        <div id="Querying" class="tab" style="display:none">
-            Querying
-            <p>Locating one or more records in a table using search parameters</p>
 
-            <table class="tablePanel">
-                <tr>
-                    <td>
-                        <button class="tablesButton" onClick="listTables()">Tables</button>
-                    </td>
-                </tr>
-
-            </table>
-
-        </div>
-
-        <div id="Joins" class="tab" style="display:none">
-            Joins
-            <p>Combining data from multiple tables</p>
-        </div>
-
-        <div id="Multi-step" class="tab" style="display:none">
-            Multi-step
-            <p>Multi-step actions involving reading & writing, such as
-               <pre> UPDATE MyTable<br/> WHERE (subquery is true) </pre>
-            </p>
-        </div>
 
         <br/>
 

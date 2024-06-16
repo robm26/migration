@@ -20,14 +20,21 @@ if "MYSQL_USERNAME" in os.environ:
 if "MYSQL_PASSWORD" in os.environ:
     mysql_password = os.environ['MYSQL_PASSWORD']
 
+mysql_conn = None
 
-mysql_conn = mysql.connector.connect(
-  database=mysql_db,
-  user=mysql_username,
-  password=mysql_password,
-  host=mysql_host
-)
-mysql_conn.autocommit = True
+try:
+    mysql_conn = mysql.connector.connect(
+      database=mysql_db,
+      user=mysql_username,
+      password=mysql_password,
+      host=mysql_host
+    )
+    mysql_conn.autocommit = True
+
+except Exception as error:
+  print("Error: " + str(error))
+  exit(1)
+
 
 mysql_cur = mysql_conn.cursor(buffered=True, dictionary=True)
 
@@ -46,13 +53,38 @@ def list_tables():
     return tables
 
 
+def runsql(sql):
+    dataset = []
+    try:
+        mysql_cur.execute(sql['sql'])
+        result = mysql_cur.fetchall()
+        dataset = format_sql_dataset(result)
+
+    except Exception as e:
+        return({"status": "Error " + str(e)})
+
+    return dataset
+
+
 def desc_table(table):
-    request = "SELECT COLUMN_NAME, COLUMN_KEY, COLUMN_TYPE "
+
+    request = "SELECT 'TABLE' AS 'INFO_TYPE', NULL AS INDEX_NAME, COLUMN_NAME, NULL AS SEQ_IN_INDEX, DATA_TYPE, COLUMN_TYPE, NULL AS REFERENCED_TABLE_NAME, NULL AS REFERENCED_COLUMN_NAME "
     request += "FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = '" + mysql_db + "' "
     request += "AND table_name = '" + table + "' "
+    request += "UNION ALL "
+    request += "SELECT 'INDEX' AS 'INFO_TYPE', INDEX_NAME, COLUMN_NAME, SEQ_IN_INDEX, NULL AS DATA_TYPE, NULL AS COLUMN_TYPE, NULL AS REFERENCED_TABLE_NAME, NULL AS REFERENCED_COLUMN_NAME "
+    request += "FROM INFORMATION_SCHEMA.STATISTICS "
+    request += "WHERE INDEX_TYPE = 'BTREE' "
+    request += "AND TABLE_SCHEMA = '" + mysql_db + "' AND TABLE_NAME = '" + table + "'"
+    request += "UNION ALL "
+    request += "SELECT 'FOREIGN_KEY' AS 'INFO_TYPE', CONSTRAINT_NAME AS INDEX_NAME, COLUMN_NAME, NULL AS SEQ_IN_INDEX, NULL AS DATA_TYPE, NULL AS COLUMN_TYPE, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME "
+    request += "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE "
+    request += "WHERE CONSTRAINT_NAME != 'PRIMARY' "
+    request += "AND TABLE_SCHEMA = '" + mysql_db + "' AND TABLE_NAME = '" + table + "';"
 
     mysql_cur.execute(request)
     result = mysql_cur.fetchall()
+
     return result
 
 
@@ -148,7 +180,7 @@ def delete_record(table, recordKey):
     delete_stmt = 'DELETE FROM ' + table + ' '
 
     delete_stmt += 'WHERE ' + deleteCondition
-    print(delete_stmt)
+#     print(delete_stmt)
 
     mysql_cur.execute(delete_stmt, key_vals)
 

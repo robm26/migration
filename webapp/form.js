@@ -5,8 +5,6 @@ async function insertRowForm(table, itemKey, existingItem) {
     clear('tblForm');
     log(null);
 
-    // let item = existingItem || {};
-
     const tableMetadata = JSON.parse(document.getElementById('tableMetadata').value);
 
     const ADs = tableMetadata['Table']['AttributeDefinitions'];
@@ -33,13 +31,6 @@ async function insertRowForm(table, itemKey, existingItem) {
         let colType = 'string';
         let colName = '';
         let rowClassName = 'gridData';
-
-        // if(colName === keyList[0]) {
-        //     rowClassName = "PK";
-        // }
-        // if(keyList.length > 1 && colName === keyList[1]) {
-        //     rowClassName = "SK";
-        // }
 
         cols.forEach((col, index2) => {
 
@@ -74,6 +65,9 @@ async function insertRowForm(table, itemKey, existingItem) {
 
         cell3.className = rowClassName;
 
+        if(existingItem) {
+            document.getElementById('dataset').value = '[' + JSON.stringify(existingItem) + ']';
+        }
         if(existingItem && itemKey && colName in itemKey) {
             cell3.innerHTML = existingItem[colName];
         } else {
@@ -132,6 +126,7 @@ async function insert(table, formName) {
 
     if(responseJSON['status'] === 1) {
         log('1 record inserted');
+        document.getElementById('dataset').value = '[' + JSON.stringify(formValuesJSON) + ']';
     } else {
         log(responseJSON['status']);
     }
@@ -156,6 +151,7 @@ async function update(table, recordKey, formName) {
 
     if(responseJSON['status'] === 1) {
         log('1 record written');
+        document.getElementById('dataset').value = '[' + JSON.stringify(formValuesJSON) + ']';
     } else {
         log(JSON.stringify(responseJSON));
     }
@@ -174,14 +170,51 @@ async function deleteItem(table, recordKey) {
 
 }
 
-async function query(table, conditions){
+async function runsql(){
 
-    const response = await postApi('/query/' + table, conditions);
+    const sqlStmt = document.getElementById('sqlText').value;
+    console.log(sqlStmt);
+
+    document.getElementById('sqlGrid').innerHTML = null;
+
+    const response = await postApi('/runsql', {sql:sqlStmt});
     const responseJSON = await response.json();
 
-    let myTable = document.getElementById('tblQuery');
+    let dataGrid = document.getElementById('sqlGrid');
+    // console.log(JSON.stringify(responseJSON, null, 2));
 
+    if('status' in responseJSON) {
+        log(responseJSON['status']);
+    } else {
+        log(responseJSON.length + ' items returned');
+        responseJSON.forEach((item, index) => {
+            const cols = Object.keys(item);
+
+            if(index === 1) { // show column names
+                const gridHeader = dataGrid.createTHead();
+                const row0 = gridHeader.insertRow(0);
+                cols.forEach((col) => {
+                    const cell0 = row0.insertCell(-1);
+                    cell0.className = "gridHeader";
+                    cell0.innerHTML = col;
+                });
+            }
+            const row = dataGrid.insertRow(-1);
+            cols.forEach((col) => {
+                const cell = row.insertCell(-1);
+                cell.innerText = item[col];
+                cell.className = 'gridData';
+            });
+        });
+    }
+
+    // let sqlResult = document.getElementById('sqlResult');
+    // sqlResult.innerHTML = JSON.stringify(responseJSON, null, 2);
 
     return {};
 
+}
+function clearsql() {
+    document.getElementById('sqlText').value = null;
+    document.getElementById('sqlGrid').innerHTML = null;
 }

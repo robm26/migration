@@ -7,6 +7,7 @@ import sys
 import os
 import importlib
 
+preview_only = False
 
 mysql_host = ""
 mysql_db = "app_db"
@@ -23,14 +24,12 @@ if "MYSQL_USERNAME" in os.environ:
 if "MYSQL_PASSWORD" in os.environ:
     mysql_password = os.environ['MYSQL_PASSWORD']
 
-# print('mysql_host', mysql_host)
-# print('mysql_db', mysql_db)
-# print('mysql_username', mysql_username)
-# print()
-
 job_file = 'job1.py'
 ddb_local = False
 ddb_region = 'us-east-2'
+
+if preview_only:
+    print('Preview item data without writing to the table')
 
 if len(sys.argv) > 1:
     job_file = sys.argv[1]
@@ -47,25 +46,13 @@ my_config = Config(
 )
 
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-
 def main(dynamodb=None, mysql_conn=None):
     ddb_table=None
     mysql_conn=None
     mysql_cur=None
 
     job_info = job.job_info()
-    print(job_info)
+    # print(job_info)
 
     if(job_info['db'] == 'dynamodb'):
         if not dynamodb:
@@ -85,6 +72,8 @@ def main(dynamodb=None, mysql_conn=None):
 
         mysql_cur = mysql_conn.cursor(buffered=True, dictionary=True)
 
+    writes = 0
+    errors = 0
 
     for tick in range(1, job_info['row_count'] + 1):
         row = job.row_maker(tick)
@@ -99,22 +88,43 @@ def main(dynamodb=None, mysql_conn=None):
             rowvals = row.values()
             insert1 = "INSERT INTO " + job_info['table'] + " (" + ','.join(rowkeys) + ") "
             insert1 += "VALUES (" + ("%s," * len(rowkeys))[:-1] + ")"
-            # insert2 = ( ','.join("'" + str(val) + "'" for val in rowvals) )
             insert2 =  list(rowvals)
 #             print(insert1)
 #             print(insert2)
-            try:
-                mysql_cur.execute(insert1, insert2)
-                mysql_conn.commit()
 
-            except Exception as e:
-                print(e)
+            if preview_only:
+                print(insert2)
+            else:
+                try:
+                    mysql_cur.execute(insert1, insert2)
+                    mysql_conn.commit()
+                    writes += 1
+
+                except Exception as e:
+                    errors += 1
+                    print(e)
 
 
     if(job_info['db'] == 'mysql'):
         mysql_cur.close()
         mysql_conn.close()
 
+    print()
+    print('load complete for ' + job_file)
+    print('writes : ' + str(writes))
+    print('errors : ' + str(errors))
 
 if __name__ == "__main__":
     main()
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'

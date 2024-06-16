@@ -8,7 +8,6 @@ DROP TABLE IF EXISTS CustomerLedger;
 DROP TABLE IF EXISTS Customers;
 DROP TABLE IF EXISTS Products;
 
-
 CREATE TABLE Customers (
   cust_id varchar(20) NOT NULL,
   name varchar(20) NOT NULL,
@@ -19,8 +18,11 @@ CREATE TABLE Customers (
   last_updated datetime NOT NULL,
   
   CONSTRAINT idx_cust_pk PRIMARY KEY (cust_id),
+
   INDEX idx_email (email),
   INDEX idx_phone (phone),
+  INDEX idx_region (region),
+  INDEX idx_region_phone (region, phone),
   INDEX idx_credit_rating (credit_rating),
   INDEX idx_region_credit_rating (region, credit_rating)
 );
@@ -39,11 +41,15 @@ CREATE TABLE Products (
 CREATE TABLE Orders (
   ord_id varchar(20) NOT NULL,
   cust_id varchar(20) NOT NULL,
+  rep varchar(20) NULL,
   ord_date datetime NOT NULL,
   ship_date datetime NOT NULL,
   last_updated datetime NOT NULL,
-  
+
+  INDEX idx_rep (rep),
+
   CONSTRAINT idx_ord_pk PRIMARY KEY (ord_id),
+
   CONSTRAINT cust_FK FOREIGN KEY (cust_id) REFERENCES Customers(cust_id)
 );
 
@@ -52,10 +58,11 @@ CREATE TABLE OrderLines (
     ord_line_id VARCHAR(20) NOT NULL,
     prod_id VARCHAR(20) NOT NULL,
     qty INT(10) NOT NULL,
-    sale_price INT(10) NOT NULL,
+    item_price INT(10) NOT NULL,
     last_updated DATETIME NOT NULL,
     
     CONSTRAINT idx_ord_line_pk PRIMARY KEY (ord_id , ord_line_id),
+
     CONSTRAINT prod_FK FOREIGN KEY (prod_id)
         REFERENCES Products (prod_id)
 );
@@ -66,10 +73,11 @@ CREATE TABLE CustomerLedger (
   event_date datetime NOT NULL,
   event_source varchar(20) NOT NULL,
   credit INT(10) NOT NULL,
-  
-  CONSTRAINT idx_cust_ledger_pk PRIMARY KEY (cust_id, event_id),
   INDEX idx_ledger_event_source (event_source),
+
+  CONSTRAINT idx_cust_ledger_pk PRIMARY KEY (cust_id, event_id),
+
   CONSTRAINT cust_ledger_FK FOREIGN KEY (cust_id) REFERENCES Customers(cust_id)
 );
 
-
+SELECT 'created database and tables' as '';

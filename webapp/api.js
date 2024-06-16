@@ -191,45 +191,91 @@ function tableSchemaGrid(metadata, grid) {
 
     });
 
-    // const cell22 = row2.insertCell(-1);
-    // cell22.className = "gridData";
-    // cell22.innerHTML = ADs.map((attr) => {
-    //     return attr['AttributeName']
-    // })
-
 }
 function formatMetadata (mdata, table) {
     const databaseEngine = Array.isArray(mdata) ? 'SQL' : 'DDB';
 
+    let indexes = [];
+    let foreignKeys = [];
+
     if(databaseEngine === 'DDB') {
         return mdata;
     } else {
+        // console.log(JSON.stringify(mdata, null, 2));
+        let tableMdata = mdata.filter((attr) => {
+            return attr['INFO_TYPE'] === 'TABLE';
+        });
 
-        let attributeDefinitions = mdata.map((attr) => {
+        let attributeDefinitions = tableMdata.map((attr) => {
             return {
                 AttributeName: attr['COLUMN_NAME'],
                 AttributeType: attr['COLUMN_TYPE']
             }
         });
+
         let keySchema = mdata.filter((attr) => {
-            return attr['COLUMN_KEY'] === 'PRI';
-        }).map((attr, index) => {
+            return attr['INFO_TYPE'] === 'INDEX' && attr['INDEX_NAME'] === 'PRIMARY';
+        }).map((key) => {
+
             return {
-                "AttributeName": attr['COLUMN_NAME'],
-                "KeyType": index === 0 ? "HASH": "RANGE"
+                "AttributeName": key['COLUMN_NAME'],
+                "KeyType": key['SEQ_IN_INDEX'] === 1 ? "HASH": "RANGE"
             };
         });
+
+        mdata.filter((attr) => {
+            return attr['INFO_TYPE'] === 'INDEX' && attr['INDEX_NAME'] !== 'PRIMARY';
+        }).map((idx, inum) => {
+
+            if(indexes.filter((i) => i['IndexName'] === idx['INDEX_NAME']).length === 0 ) { // first time seeing this index row
+                indexes.push({
+                    IndexName: idx['INDEX_NAME'],
+                    KeySchema: [{
+                        "AttributeName": idx['COLUMN_NAME'],
+                        "KeyType": idx['SEQ_IN_INDEX'] === 1 ?  "HASH" : "RANGE"
+                    }]
+                });
+
+            } else {
+                let idxPosition = indexes.findIndex((i) => i['IndexName'] === idx['INDEX_NAME']);
+                let myKS = indexes[idxPosition]['KeySchema'];
+
+                myKS.push({
+                    "AttributeName": idx['COLUMN_NAME'],
+                    "KeyType": idx['SEQ_IN_INDEX'] === 1 ?  "HASH" : "RANGE"
+                })
+                indexes[idxPosition]['KeySchema'] = myKS;
+            }
+        });
+
+        mdata.filter((attr) => {
+            return attr['INFO_TYPE'] === 'FOREIGN_KEY';
+        }).map((fk) => {
+            foreignKeys.push({
+                ConstraintName: fk['INDEX_NAME'],
+                ColumnName: fk['COLUMN_NAME'],
+                ReferencedTable: fk['REFERENCED_TABLE_NAME'],
+                ReferencedColumn: fk['REFERENCED_COLUMN_NAME'],
+            });
+        });
+
 
         let metadata = {
             Table: {
                 AttributeDefinitions: attributeDefinitions,
                 TableName: table,
-                KeySchema: keySchema
+                KeySchema: keySchema,
+                GlobalSecondaryIndexes: indexes
             }
         };
+        if(foreignKeys.length > 0) {
+            metadata['Table']['ForeignKeys'] = foreignKeys;
+        }
+
         return metadata;
     }
 }
+
 
 function clear(element) {
     if(document.getElementById('generateResults')) {

@@ -1,6 +1,9 @@
 
 const dateConversionType = 'string'; // int
-
+const sqlSamples = [
+    "SELECT * FROM Customers",
+    "SELECT * FROM Products"
+];
 function setCookie(value) {
 
     if(typeof value === 'object' || value.length === 0) {
@@ -54,6 +57,7 @@ async function renderNav() {
 function openTab(tabName) {
     clear('grid1');
     document.getElementById('tableCrudButtons').innerHTML = '';
+    document.getElementById('tab').value = tabName;
     let x = document.getElementsByClassName("tab");
     for (let i = 0; i < x.length; i++) {
         x[i].style.display = "none";
@@ -68,6 +72,15 @@ function openTab(tabName) {
             tabs[i].className = 'tabInactive';
         }
     }
+    if(tabName === 'CRUD') {
+        const tableName = document.getElementById('tableName').value;
+        if(tableName) {
+            descTableClick(tableName);
+        }
+    }
+    if(tabName === 'Querying') {
+        descIndexesClick(document.getElementById('tableName').value);
+    }
 
 }
 
@@ -76,8 +89,9 @@ async function listTables() {
     clear('tblForm');
     document.getElementById('tableCrudButtons').innerHTML = '';
     document.getElementById('generateDiv').className = 'GenHidden';
+    document.getElementById('tableName').value = '';
 
-    let tableListTable = document.getElementById("tableList");
+    let tableListTable = document.getElementById("leftNavTable");
     // let tableDetailsTable = document.getElementById("tableDetailsTable");
 
     tableListTable.innerHTML = null;
@@ -95,10 +109,31 @@ async function listTables() {
         newButton.textContent = item;
         newButton.className = "tableButton";
         newButton.id = 'btn' + item;
-        newButton.onclick = () => descTableClick(item);
+
+        newButton.onclick = () => tableClickHandler(item);
+
         cell1.appendChild(newButton);
 
     });
+}
+async function tableClickHandler(table) {
+
+    const resetButton = document.getElementsByClassName('tableButtonActive');
+    if(resetButton.length>0) {
+        resetButton[0].className = 'tableButton';
+    }
+
+    const clickedButton = document.getElementById('btn' + table);
+    clickedButton.className = 'tableButtonActive';
+
+    if(document.getElementById('tab').value === 'Querying') {
+        if(table) {
+            await descIndexesClick(table);
+        }
+
+    } else {
+        await descTableClick(table);
+    }
 }
 
 async function descTableClick(table) {
@@ -188,21 +223,84 @@ async function descTableClick(table) {
     btn2.onclick = () => insertRowForm(table);
     cell2.appendChild(btn2);
 
-
-    const resetButton = document.getElementsByClassName('tableButtonActive');
-    if(resetButton.length>0) {
-        resetButton[0].className = 'tableButton';
-    }
-
-    const clickedButton = document.getElementById('btn' + table);
-    clickedButton.className = 'tableButtonActive';
-
     tableSchemaGrid(tableMetadata, 'grid1');
 
     document.getElementById('generateDiv').className = 'GenVisible';
+    document.getElementById('generateType').innerHTML = 'DynamoDB Table Definition';
+
 
 }
 
+async function descIndexesClick(table) {
+    clear('indexSummary');
+    clear('tblForm');
+    document.getElementById('dataset').value = null;
+
+    if(table) {
+
+        const descTableResult = await callApi('/desc_table/' + table);
+        let tableMetadata = formatMetadata(descTableResult, table);
+        document.getElementById('tableName').value = table;
+        document.getElementById('tableMetadata').value = JSON.stringify(tableMetadata);
+        tableMetadata = JSON.stringify(tableMetadata);
+
+        const idxTable = document.getElementById('indexSummary');
+
+        let indexMetadata = [];
+        if (tableMetadata) {
+            indexMetadata = JSON.parse(tableMetadata)['Table']['GlobalSecondaryIndexes'];
+            // console.log(JSON.stringify(indexMetadata, null, 2));
+            indexMetadata.forEach((idxCol, idx) => {
+                if (idx === 0) {
+                    const row0 = idxTable.insertRow(-1);
+                    const cell0 = row0.insertCell();
+                    cell0.innerHTML = 'Index Name';
+                    cell0.className = "gridHeader";
+
+                    Object.keys(idxCol).forEach((headerCol, colPosition) => {
+                        const cell = row0.insertCell();
+                        cell.className = colPosition === 0 ? "PKheader" : "SKheader";
+
+                        cell.innerHTML = "Key " + (colPosition + 1);
+                    });
+                }
+                const row = idxTable.insertRow(-1);
+                const cell1 = row.insertCell();
+                cell1.className = "gridData";
+                cell1.innerHTML = idxCol['IndexName'];
+                const cell2 = row.insertCell();
+                cell2.className = "gridData";
+                cell2.innerHTML = idxCol['KeySchema'][0]['AttributeName'];
+
+                const cell3 = row.insertCell();
+                cell3.className = "gridData";
+                if (idxCol['KeySchema'].length > 1) {
+                    cell3.innerHTML = idxCol['KeySchema'][1]['AttributeName'];
+                } else {
+                    cell3.innerHTML = '';
+                }
+
+            });
+        }
+    }
+
+    const sampleButtonsSpan = document.getElementById('sampleButtons');
+    sampleButtonsSpan.innerHTML = '';
+
+    sqlSamples.forEach((sample, idx) => {
+        const newButton = document.createElement('button');
+        newButton.textContent = 'S' + (idx + 1);
+        // newButton.className = "tableButton";
+        newButton.onclick = () => updateSQL(sample);
+        sampleButtonsSpan.appendChild(newButton);
+    });
+
+}
+
+function updateSQL(sql) {
+    document.getElementById('sqlText').value = sql;
+
+}
 async function scanTable(table) {
 
     clear('tblForm');
@@ -215,6 +313,7 @@ async function scanTable(table) {
     const tableMetadata = document.getElementById('tableMetadata').value;
 
     fillGrid(scanData, 'grid1', table, tableMetadata);
+    document.getElementById('generateType').innerHTML = 'Dataset as DynamoDB JSON';
 
 }
 async function getItem(table, formName) {
@@ -235,11 +334,14 @@ async function getItem(table, formName) {
 
     if(responseJSON.length === 0) {
         log('item not found');
+        document.getElementById('generateDiv').className = 'GenHidden';
+        // document.getElementById('dataset').value = '0';
     } else {
+        document.getElementById('generateDiv').className = 'GenVisible';
         document.getElementById('dataset').value = JSON.stringify(responseJSON);
         insertRowForm(table, formValuesJSON, responseJSON[0]);
     }
-
+    document.getElementById('generateType').innerHTML = 'Item as DynamoDB JSON';
     return {};
 }
 
@@ -248,12 +350,11 @@ function generate() {
     const textBox = document.getElementById('textGen');
     const tableMetadata = document.getElementById('tableMetadata').value;
     const dataset =  document.getElementById('dataset').value;
-    console.log('*' + typeof dataset + '*');
 
     let generateType = 'table';
 
     if(dataset.length > 0) {
-        console.log(dataset);
+
         if(JSON.parse(dataset).length === 1) {
             generateType = 'record';
         } else {
@@ -272,18 +373,35 @@ function generate() {
     tmdFormatted['Table']['KeySchema'] = JSON.parse(tableMetadata)['Table']['KeySchema'];
     tmdFormatted['Table']['AttributeDefinitions'] = JSON.parse(tableMetadata)['Table']['AttributeDefinitions'];
 
-    textBox.value = generateType;
-    // textBox.value = JSON.stringify(tmdFormatted, null, 2);
-
+    const generated = generateDDB(tableMetadata, dataset);
+    textBox.value = generated;
     document.getElementById('generateResults').style.display = 'block';
-
-    // document.getElementById('dataset').value;
 
     return {};
 }
 
+function copyText() {
+    const textGen = document.getElementById('textGen');
+    textGen.focus();
+    textGen.select();
+
+    try {
+        document.execCommand('copy');
+        textGen.blur();
+    } catch (err) {
+        console.log('unable to copy');
+    }
+    console.log('copied');
+
+}
 function log(msg, status) {
-    let logDiv = document.getElementById('callStatusDiv');
+
+    let tab = document.getElementById('tab').value;
+
+    let logDiv;
+    if(tab === 'CRUD') {logDiv = document.getElementById('log'); }
+    if(tab === 'Querying') {logDiv = document.getElementById('log2');}
+
     if(msg) {
         logDiv.style.visibility = 'visible';
     } else {
