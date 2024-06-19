@@ -103,6 +103,25 @@ def scan_table(table):
     return dataset
 
 
+def query(table, request):
+
+    keyList = list(request['queryRequest']['queryConditions'].keys())
+    sql_condition = keyList[0] + ' = %s'
+
+    if len(keyList) > 1:
+        sql_condition += ' AND ' + keyList[1] + ' = %s'
+
+    key_vals = list(request['queryRequest']['queryConditions'].values())
+
+    get_stmt = 'SELECT * FROM ' + table + ' WHERE ' + sql_condition
+
+    mysql_cur.execute(get_stmt, key_vals)
+    result = mysql_cur.fetchall()
+    dataset = format_sql_dataset(result)
+
+    return dataset
+
+
 def get_record(table, request):
 
     keyList = list(request['recordKey'].keys())

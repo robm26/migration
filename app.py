@@ -58,6 +58,10 @@ def update_record(table):
 def delete_record(table):
     return db.delete_record(table, app.current_request.json_body)
 
+@app.route('/query/{table}', methods=['POST'], cors=True, content_types=['application/json'])
+def query(table):
+    return db.query(table, app.current_request.json_body)
+
 @app.route("/runsql", methods=['POST'], cors=True, content_types=['application/json'])
 def runsql():
     return db.runsql(app.current_request.json_body)

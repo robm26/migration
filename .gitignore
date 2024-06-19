@@ -6,3 +6,7 @@ webapp/build/
 .chalice/deployed/
 setenv.sh
 .chalice/config.json
+desc.json
+setup.sh
+syncs3.sh
+

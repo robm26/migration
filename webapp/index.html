@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,8 +35,8 @@
         <span id="apiTitle">
 
         </span>
-<!--        <button id="sampleAPI2" onClick="setCookie(prompt('Sample API Ireland', 'https://mjr9wyamog.execute-api.eu-west-1.amazonaws.com/api/'))">Ireland</button>-->
-<!--        <button id="sampleAPI3" onClick="setCookie(prompt('Sample API Singapore', 'https://voax9a7ub2.execute-api.ap-southeast-1.amazonaws.com/api/'))">Singapore</button>-->
+        <!--        <button id="sampleAPI2" onClick="setCookie(prompt('Sample API Ireland', 'https://mjr9wyamog.execute-api.eu-west-1.amazonaws.com/api/'))">Ireland</button>-->
+        <!--        <button id="sampleAPI3" onClick="setCookie(prompt('Sample API Singapore', 'https://voax9a7ub2.execute-api.ap-southeast-1.amazonaws.com/api/'))">Singapore</button>-->
 
     </div>
     <br/>
@@ -46,7 +47,6 @@
         <input type="hidden" name="dataset" id="dataset"  />
         <input type="hidden" name="engine" id="engine" value="MySQL" />
         <input type="hidden" name="tab" id="tab" value="CRUD" />
-
 
         <div style="width: 100%; display: table;" id="leftNavDivPanel">
             <div style="display: table-row">
@@ -60,21 +60,20 @@
                         <button class="tabInactive" onclick="openTab('Multi-step')">Multi-step</button>
                     </div>
                 </div>
-
             </div>
 
-            <div style="display: table-row">
+            <div style="display: table-row;">
                 <div style="width: 10%; display: table-cell;" id="leftNavDiv">
                     <button class="tablesButton" id="tablesButton" onClick="listTables()">Tables</button>
                     <table id="leftNavTable"></table>
                 </div>
 
-                <div style="display: table-cell;">
-                    <div id="CRUD" class="tab" style="display:block">
-                        Create, Read, Update, & Delete, the four basic database table operations.
-                        <br/><br/>
+                <div style="display: table-cell; ">
+                    <div id="CRUD" class="tab" style="display:block;">
+                        <span id="tableTitle" class="tableTitle"></span>
+                        <span id="tableTitleValue" class="tableTitleValue"></span>
 
-                        <table class="tablePanel">
+                        <table id="tablePanel" class="tablePanelHidden" >
                             <tr>
                                 <td rowspan="2" class="crudMainPanel">
                                     <div id="tableDetails">
@@ -118,19 +117,21 @@
                     </div>
 
                     <div id="Querying" class="tab" style="display:none">
-                        Querying
-                        <p>Locating one or more records in a table using search parameters. <br/>Querying using an indexed key is fast and efficient. </p>
+                        <span id="tableTitle2" class="tableTitle"></span>
+                        <span id="tableTitleValue2" class="tableTitleValue"></span>
 
                         <div>
                             <form id="formQuerying" method="post" action="" onsubmit="return false;">
+                                Primary Key index :
                                 <table id="indexSummary" class="indexSummary"></table>
+                                <ul id="indexSummaryList"></ul>
+
                                 <br/>
                                 <div class="sqlPanel" >
                                     <button class="sqlButton" onClick="runsql()">RUN SQL</button>
                                     <button class="sqlButtonClear" onClick="clearsql()">CLEAR</button>
-                                    <span id="sampleButtons">
 
-                                    </span>
+                                    <span id="sampleButtons"></span>
 
                                     <div id="log2" class="log">log2</div>
 
@@ -149,23 +150,29 @@
 
                     <div id="Multi-step" class="tab" style="display:none">
                         Multi-step
-                        <p>Multi-step actions involving reading & writing, such as
-                        <pre> UPDATE MyTable<br/> WHERE (subquery is true) </pre>
-                        </p>
+                        <ul>
+                            <li>
+                                <p>Multi-step actions involving reading & writing, such as:
+                                <pre> UPDATE/DELETE MyTable<br/> WHERE <br/>&nbsp;&nbsp;&nbsp;(subquery is true) </pre>
+                                These can be implemented as jobs with put-item calls from your compute runtime.
+                                </p>
+                            </li>
+                            <li>
+                                Business logic in stored procedures, other SQL text expressions, same.
+                            </li>
+
+                        </ul>
+
+
                     </div>
 
                 </div>
             </div>
         </div>
 
-
-
         <br/>
 
     </div>
-
-<!--    <button  onclick="showSessionStorage();" >debug</button><br/>-->
-<!--    <div id="debug"></div>-->
 
 </div>
 

@@ -4,9 +4,9 @@ USE app_db;
 
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS OrderLines;
-DROP TABLE IF EXISTS CustomerLedger;
 DROP TABLE IF EXISTS Customers;
 DROP TABLE IF EXISTS Products;
+-- DROP TABLE IF EXISTS CustomerLedger;
 
 CREATE TABLE Customers (
   cust_id varchar(20) NOT NULL,
@@ -34,7 +34,9 @@ CREATE TABLE Products (
   list_price int(10) NOT NULL,
   last_updated datetime NOT NULL,
   
-  CONSTRAINT idx_prod_pk PRIMARY KEY (prod_id)
+  CONSTRAINT idx_prod_pk PRIMARY KEY (prod_id),
+
+  INDEX idx_category (category, last_updated)
 );
 
 
@@ -67,17 +69,17 @@ CREATE TABLE OrderLines (
         REFERENCES Products (prod_id)
 );
 
-CREATE TABLE CustomerLedger (
-  cust_id varchar(20) NOT NULL,
-  event_id varchar(20) NOT NULL,
-  event_date datetime NOT NULL,
-  event_source varchar(20) NOT NULL,
-  credit INT(10) NOT NULL,
-  INDEX idx_ledger_event_source (event_source),
-
-  CONSTRAINT idx_cust_ledger_pk PRIMARY KEY (cust_id, event_id),
-
-  CONSTRAINT cust_ledger_FK FOREIGN KEY (cust_id) REFERENCES Customers(cust_id)
-);
+-- CREATE TABLE CustomerLedger (
+--   cust_id varchar(20) NOT NULL,
+--   event_id varchar(20) NOT NULL,
+--   event_date datetime NOT NULL,
+--   event_source varchar(20) NOT NULL,
+--   credit INT(10) NOT NULL,
+--   INDEX idx_ledger_event_source (event_source),
+--
+--   CONSTRAINT idx_cust_ledger_pk PRIMARY KEY (cust_id, event_id),
+--
+--   CONSTRAINT cust_ledger_FK FOREIGN KEY (cust_id) REFERENCES Customers(cust_id)
+-- );
 
 SELECT 'created database and tables' as '';

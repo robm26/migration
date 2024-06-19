@@ -1,9 +1,11 @@
 
 const dateConversionType = 'string'; // int
 const sqlSamples = [
-    "SELECT * FROM Customers",
-    "SELECT * FROM Products"
+
+    "SELECT * \nFROM Customers",
+    "SELECT * \nFROM Orders"
 ];
+
 function setCookie(value) {
 
     if(typeof value === 'object' || value.length === 0) {
@@ -58,6 +60,7 @@ function openTab(tabName) {
     clear('grid1');
     document.getElementById('tableCrudButtons').innerHTML = '';
     document.getElementById('tab').value = tabName;
+
     let x = document.getElementsByClassName("tab");
     for (let i = 0; i < x.length; i++) {
         x[i].style.display = "none";
@@ -87,9 +90,12 @@ function openTab(tabName) {
 async function listTables() {
     clear('grid1');
     clear('tblForm');
+
+
     document.getElementById('tableCrudButtons').innerHTML = '';
     document.getElementById('generateDiv').className = 'GenHidden';
     document.getElementById('tableName').value = '';
+    setTableTitle(); // clear it
 
     let tableListTable = document.getElementById("leftNavTable");
     // let tableDetailsTable = document.getElementById("tableDetailsTable");
@@ -117,6 +123,8 @@ async function listTables() {
     });
 }
 async function tableClickHandler(table) {
+    document.getElementById('tablePanel').className = 'tablePanel';
+    setTableTitle(table);
 
     const resetButton = document.getElementsByClassName('tableButtonActive');
     if(resetButton.length>0) {
@@ -137,6 +145,9 @@ async function tableClickHandler(table) {
 }
 
 async function descTableClick(table) {
+    // let titles = document.getElementsByClassName('tableTitle');
+    // console.log(titles);
+
     clear('tblForm');
     document.getElementById('dataset').value = null;
 
@@ -155,8 +166,8 @@ async function descTableClick(table) {
 
     const tableCrudButtons = document.getElementById('tableCrudButtons');
     tableCrudButtons.innerHTML = '';
-    const row = tableCrudButtons.insertRow(-1);
 
+    const row = tableCrudButtons.insertRow(-1);
     const cell1 = row.insertCell(-1);
     const btn1 = document.createElement('button');
     btn1.textContent = 'SCAN';
@@ -226,7 +237,7 @@ async function descTableClick(table) {
     tableSchemaGrid(tableMetadata, 'grid1');
 
     document.getElementById('generateDiv').className = 'GenVisible';
-    document.getElementById('generateType').innerHTML = 'DynamoDB Table Definition';
+    // document.getElementById('generateType').innerHTML = 'DynamoDB Table Definition';
 
 
 }
@@ -234,58 +245,119 @@ async function descTableClick(table) {
 async function descIndexesClick(table) {
     clear('indexSummary');
     clear('tblForm');
+    clear('indexSummaryList');
+
     document.getElementById('dataset').value = null;
 
     if(table) {
 
         const descTableResult = await callApi('/desc_table/' + table);
+
         let tableMetadata = formatMetadata(descTableResult, table);
-        document.getElementById('tableName').value = table;
         document.getElementById('tableMetadata').value = JSON.stringify(tableMetadata);
+
+        setTableTitle(table);
+
+        const ADs = tableMetadata['Table']['AttributeDefinitions'];
+        const Ks = tableMetadata['Table']['KeySchema'];
+        const keyList = Ks.map((key) => key['AttributeName']);
+        let AdTypes = {};
+        ADs.map((ad) => {
+            AdTypes[ad['AttributeName']] = ad['AttributeType'];
+        });
+
         tableMetadata = JSON.stringify(tableMetadata);
 
         const idxTable = document.getElementById('indexSummary');
+        const idxTableList = document.getElementById('indexSummaryList');
 
         let indexMetadata = [];
+
         if (tableMetadata) {
             indexMetadata = JSON.parse(tableMetadata)['Table']['GlobalSecondaryIndexes'];
-            // console.log(JSON.stringify(indexMetadata, null, 2));
+
             indexMetadata.forEach((idxCol, idx) => {
-                if (idx === 0) {
+
+                if(idx === 0) {
                     const row0 = idxTable.insertRow(-1);
                     const cell0 = row0.insertCell();
-                    cell0.innerHTML = 'Index Name';
-                    cell0.className = "gridHeader";
-
-                    Object.keys(idxCol).forEach((headerCol, colPosition) => {
-                        const cell = row0.insertCell();
-                        cell.className = colPosition === 0 ? "PKheader" : "SKheader";
-
-                        cell.innerHTML = "Key " + (colPosition + 1);
-                    });
-                }
-                const row = idxTable.insertRow(-1);
-                const cell1 = row.insertCell();
-                cell1.className = "gridData";
-                cell1.innerHTML = idxCol['IndexName'];
-                const cell2 = row.insertCell();
-                cell2.className = "gridData";
-                cell2.innerHTML = idxCol['KeySchema'][0]['AttributeName'];
-
-                const cell3 = row.insertCell();
-                cell3.className = "gridData";
-                if (idxCol['KeySchema'].length > 1) {
-                    cell3.innerHTML = idxCol['KeySchema'][1]['AttributeName'];
-                } else {
-                    cell3.innerHTML = '';
+                    cell0.innerHTML = 'Secondary Index : ';
                 }
 
+                let ksLength = idxCol['KeySchema'].length;
+                const stylePk = "background-color: SkyBlue;";
+                const styleSk = "background-color: LightGreen;";
+
+                idxCol['KeySchema'].forEach((key, idxKey) => {
+
+                    const row = idxTable.insertRow(-1);
+
+                    if(idxKey === 0) {
+                        const cell1 = row.insertCell();
+                        cell1.className = "gridDataFinal";
+                        cell1.style = "border-top-left-radius:5px;border-bottom-left-radius:5px;padding-bottom:10px;padding-top:10px;";
+                        cell1.innerHTML = idxCol['IndexName'];
+                        cell1.rowSpan = ksLength;
+                    }
+
+                    const cell2 = row.insertCell();
+                    cell2.className = idxKey === ksLength - 1 ? "gridDataFinal" : "gridData";
+                    cell2.innerHTML = idxCol['KeySchema'][idxKey]['AttributeName'];
+                    cell2.style = (idxKey === 0 ? stylePk : styleSk);
+
+                    const cell3 = row.insertCell();
+                    cell3.className = idxKey === ksLength - 1 ? "gridDataFinal" : "gridData";
+                    cell3.innerHTML = AdTypes[idxCol['KeySchema'][idxKey]['AttributeName']] || '-';
+                    cell3.style = (idxKey === 0 ? stylePk : styleSk);
+
+                    const cell4 = row.insertCell();
+                    cell4.className = "gridData";
+                    const inputBox = document.createElement('input');
+                    inputBox.id = 'isBox' + idx + '#' + idxKey;
+                    inputBox.style = 'width:100px;';
+                    inputBox.value = 'eee';
+                    cell4.appendChild(inputBox);
+
+                    const cell5 = row.insertCell();
+                    cell5.className = "gridData";
+                    const indexSearchButton = document.createElement('button');
+                    indexSearchButton.id = 'isBtn' + idx + '#' + idxKey;
+                    indexSearchButton.innerText = 'GO';
+                    indexSearchButton.onclick = () => {
+                        let qr = {'queryRequest': {'queryConditions': {}}};
+                        qr['queryRequest']['index'] = idxCol['IndexName'];
+
+                        for (let i =0; i <= idxKey; i++) {
+                            qr['queryRequest']['queryConditions'][idxCol['KeySchema'][i]['AttributeName']] = document.getElementById('isBox' + idx + '#' + i).value;
+                        }
+                        let sql = 'SELECT *\nFROM ' + table + '\nWHERE ';
+                        Object.keys(qr['queryRequest']['queryConditions']).forEach((key, idxCondition) => {
+                            sql += key + '="' + qr['queryRequest']['queryConditions'][key] + '"';
+                            if(Object.keys(qr['queryRequest']['queryConditions']).length - 1 > idxCondition) {
+                                sql += '\n  AND ';
+                            } else {
+                                sql += ';';
+                            }
+                        });
+                        updateSQL(sql);  // update but call runQuery() and not runsql()
+
+                        runQuery(table, qr);
+
+                    };
+                    cell5.appendChild(indexSearchButton);
+
+                    if(ksLength - 1 === idxKey) {
+                        const rowSpacer = idxTable.insertRow(-1);
+                        const cellSpacer = rowSpacer.insertCell();
+                        cellSpacer.innerHTML = '&nbsp;';
+                    }
+                });
             });
         }
     }
 
     const sampleButtonsSpan = document.getElementById('sampleButtons');
-    sampleButtonsSpan.innerHTML = '';
+    sampleButtonsSpan.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp; SQL Examples : ';
 
     sqlSamples.forEach((sample, idx) => {
         const newButton = document.createElement('button');
@@ -313,7 +385,7 @@ async function scanTable(table) {
     const tableMetadata = document.getElementById('tableMetadata').value;
 
     fillGrid(scanData, 'grid1', table, tableMetadata);
-    document.getElementById('generateType').innerHTML = 'Dataset as DynamoDB JSON';
+    // document.getElementById('generateType').innerHTML = 'Dataset as DynamoDB JSON';
 
 }
 async function getItem(table, formName) {
@@ -345,7 +417,7 @@ async function getItem(table, formName) {
     return {};
 }
 
-function generate() {
+function generate(type) {
 
     const textBox = document.getElementById('textGen');
     const tableMetadata = document.getElementById('tableMetadata').value;
@@ -361,6 +433,7 @@ function generate() {
             generateType = 'dataset';
         }
     }
+    generateType = type || generateType;
 
     const tmdFormatted = {
         "Table": {

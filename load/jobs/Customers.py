@@ -14,7 +14,7 @@ def row_maker(tick):
     row = {
         'cust_id': pk,
         'name': names[tick-1],
-        'email': 'support@' + str(random_string(4)) + '.com',
+        'email': 'user1@' + str(random_string(4)) + '.com',
         'phone': phone,
         'region': random.choice(regions),
         'credit_rating': random.randrange(500, 800, 10),

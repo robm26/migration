@@ -170,23 +170,23 @@ async function deleteItem(table, recordKey) {
 
 }
 
-async function runsql(){
-
-    const sqlStmt = document.getElementById('sqlText').value;
-    console.log(sqlStmt);
+async function runQuery(table, queryRequest){
 
     document.getElementById('sqlGrid').innerHTML = null;
 
-    const response = await postApi('/runsql', {sql:sqlStmt});
+    const response = await postApi('/query/' + table, queryRequest);
+
     const responseJSON = await response.json();
 
+    console.log(JSON.stringify(responseJSON, null, 2));
+
     let dataGrid = document.getElementById('sqlGrid');
-    // console.log(JSON.stringify(responseJSON, null, 2));
 
     if('status' in responseJSON) {
         log(responseJSON['status']);
     } else {
         log(responseJSON.length + ' items returned');
+
         responseJSON.forEach((item, index) => {
             const cols = Object.keys(item);
 
@@ -208,8 +208,48 @@ async function runsql(){
         });
     }
 
-    // let sqlResult = document.getElementById('sqlResult');
-    // sqlResult.innerHTML = JSON.stringify(responseJSON, null, 2);
+    return {};
+
+}
+async function runsql(){
+
+    const sqlStmt = document.getElementById('sqlText').value;
+    console.log(sqlStmt);
+
+    document.getElementById('sqlGrid').innerHTML = null;
+
+
+    const response = await postApi('/runsql', {sql:sqlStmt});
+
+    const responseJSON = await response.json();
+
+    let dataGrid = document.getElementById('sqlGrid');
+
+    if('status' in responseJSON) {
+        log(responseJSON['status']);
+    } else {
+        log(responseJSON.length + ' items returned');
+
+        responseJSON.forEach((item, index) => {
+            const cols = Object.keys(item);
+
+            if(index === 1) { // show column names
+                const gridHeader = dataGrid.createTHead();
+                const row0 = gridHeader.insertRow(0);
+                cols.forEach((col) => {
+                    const cell0 = row0.insertCell(-1);
+                    cell0.className = "gridHeader";
+                    cell0.innerHTML = col;
+                });
+            }
+            const row = dataGrid.insertRow(-1);
+            cols.forEach((col) => {
+                const cell = row.insertCell(-1);
+                cell.innerText = item[col];
+                cell.className = 'gridData';
+            });
+        });
+    }
 
     return {};
 
@@ -217,4 +257,20 @@ async function runsql(){
 function clearsql() {
     document.getElementById('sqlText').value = null;
     document.getElementById('sqlGrid').innerHTML = null;
+}
+function setTableTitle(title) {
+
+    if(title) {
+        document.getElementById('tableTitle').innerHTML = 'Table : ';
+        document.getElementById('tableTitle2').innerHTML = 'Table : ';
+        document.getElementById('tableTitleValue').innerHTML = title + '<br/>';
+        document.getElementById('tableTitleValue2').innerHTML = title + '<br/>';
+
+    } else {
+        document.getElementById('tableTitle').innerHTML = '';
+        document.getElementById('tableTitle2').innerHTML = '';
+        document.getElementById('tableTitleValue').innerHTML = '';
+        document.getElementById('tableTitleValue2').innerHTML = '';
+    }
+
 }
