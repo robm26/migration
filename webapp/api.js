@@ -43,14 +43,16 @@ async function postApi(action, body) {
 
     const response = await fetch(fullApiPath, fetchRequest);
     return response;
-
 }
 
 function fillGrid(data, grid, table, tableMetadata) {
+    if(!grid) return;
+
     clear(grid);
+
     log(null);
-    let myGrid = document.getElementById(grid);
-    myGrid.className = grid;
+    let myGrid = document.getElementById(grid) || grid;
+    // myGrid.className = grid;
     if(data.length === 0) { log('0 records'); }
 
     data.forEach((item, index) => {
@@ -80,14 +82,12 @@ function fillGrid(data, grid, table, tableMetadata) {
                 } else {
                     cell0.className = "gridHeader";
                 }
-
                 cell0.innerHTML = col;
             });
 
             const cellDH = row0.insertCell(-1);
             cellDH.className = "gridData";
             cellDH.innerHTML = '';
-
         }
         const row = myGrid.insertRow(-1);
         cols.forEach((col) => {
@@ -122,7 +122,6 @@ function fillGrid(data, grid, table, tableMetadata) {
 
         button2.appendChild(document.createTextNode("update"));
         cellD.appendChild(button2);
-
     });
 }
 
@@ -188,9 +187,7 @@ function tableSchemaGrid(metadata, grid) {
             cell3.className = "gridData";
             cell3.innerHTML = AdTypes[attr['AttributeName']];
         }
-
     });
-
 }
 function formatMetadata (mdata, table) {
     const databaseEngine = Array.isArray(mdata) ? 'SQL' : 'DDB';
@@ -259,7 +256,6 @@ function formatMetadata (mdata, table) {
             });
         });
 
-
         let metadata = {
             Table: {
                 AttributeDefinitions: attributeDefinitions,
@@ -276,13 +272,13 @@ function formatMetadata (mdata, table) {
     }
 }
 
-
 function clear(element) {
     if(document.getElementById('generateResults')) {
         document.getElementById('generateResults').style.display = 'none';
     }
 
     let myElement = document.getElementById(element);
-    myElement.innerHTML = '';
-
+    if(myElement) {
+        myElement.innerHTML = '';
+    }
 }

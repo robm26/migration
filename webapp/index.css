@@ -270,11 +270,14 @@ input {
 .log {
     padding:2px;
     padding-left:10px;
+    padding-right:5px;
     margin-top:5px;
-    margin-left:20px !important;
+    margin-left:15px !important;
+    margin-right:15px !important;
     background-color: #e0e0bf;
     border-radius:5px;
     visibility: hidden;
+    display: inline-block;
 }
 
 .PK {
@@ -330,33 +333,34 @@ input {
 
 }
 
-#btnGenerate {
+#btnGenerate, #btnGenerateIndexes {
     font-weight:bold;
 }
 
 .GenVisible {
     visibility: visible;
     background-color:silver;
-    margin-top:20px;
+    margin:20px;
     padding:10px;
     border-radius:5px;
     font-size:smaller;
-    color:dimgray;
+    color:#444;
 
 }
 .GenHidden {
     height:400px;
     display:none;
 }
-#textGen {
+#textGen, #textGenIndex {
     background-color:lightgray;
     color:#222222;
     border:none;
     border-radius:7px;
     margin-top:10px;
-    height:400px;
+    height:360px;
     width:500px;
     padding:8px;
+    box-sizing:border-box;
 }
 
 .tableButtonCell {
@@ -386,12 +390,13 @@ input {
 .sqlText {
     border-radius:3px;
     color:#333;
-    width: 600px;
+    width: 90%;
     height: 150px;
     padding:10px;
     margin:10px;
     border:none;
     background-color:whitesmoke;
+
 }
 
 .sqlText:focus {
@@ -404,6 +409,7 @@ input {
     color:dimgray;
     background-color:whitesmoke;
     font-weight:bold;
+    font-size:larger;
 }
 .sqlButtonClear {
     color:dimgray;
@@ -433,4 +439,66 @@ input {
 
     display: inline-block;
 
+}
+
+.indexSummary {
+    margin-top:0;
+    margin-left:10px;
+}
+
+.indexSummary td {
+
+}
+#sqlGrid {
+    margin-top:15px;
+    margin-bottom:10px;
+    margin-left:5px;
+    border-radius:5px;
+}
+
+#sqlGrid thead:first-child td {
+    background-color: DarkGray;
+    padding:8px;
+}
+
+#FKs {
+    background-color:silver;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 3px;
+    margin-bottom:15px;
+    /*margin:20px;*/
+    padding:10px;
+    border-radius:5px;
+    font-size:smaller;
+    color:#444;
+    visibility: hidden;
+}
+
+#btnFKs {
+    font-weight:bold;
+}
+.fkSpacer {
+    background-color: green;
+}
+
+.fkTable {
+    border:2px solid silver;
+    border-radius:5px;
+    margin: 5px;
+
+}
+.fkTable td {
+    text-align:center;
+    padding:7px;
+    background-color:#aaa;
+    font-size:larger;
+    color: black;
+}
+.fkTable td:nth-child(2) {
+
+    width:300px;
+}
+.fkTable tr:first-child td {
+    background-color:#888;
 }

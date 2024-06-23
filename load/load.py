@@ -102,7 +102,10 @@ def main(dynamodb=None, mysql_conn=None):
 
                 except Exception as e:
                     errors += 1
-                    print(e)
+
+                    print('ee')
+                    list(rowvals)
+                    print('eee')
 
 
     if(job_info['db'] == 'mysql'):

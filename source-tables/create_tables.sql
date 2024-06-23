@@ -2,10 +2,11 @@ CREATE DATABASE IF NOT EXISTS app_db;
 
 USE app_db;
 
-DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS OrderLines;
+DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Customers;
 DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS Reps;
 -- DROP TABLE IF EXISTS CustomerLedger;
 
 CREATE TABLE Customers (
@@ -20,7 +21,6 @@ CREATE TABLE Customers (
   CONSTRAINT idx_cust_pk PRIMARY KEY (cust_id),
 
   INDEX idx_email (email),
-  INDEX idx_phone (phone),
   INDEX idx_region (region),
   INDEX idx_region_phone (region, phone),
   INDEX idx_credit_rating (credit_rating),
@@ -39,6 +39,13 @@ CREATE TABLE Products (
   INDEX idx_category (category, last_updated)
 );
 
+CREATE TABLE Reps (
+    rep_id VARCHAR(20) NOT NULL,
+    rep_name VARCHAR(20) NOT NULL,
+	last_updated DATETIME NOT NULL,
+    CONSTRAINT idx_rep_pk PRIMARY KEY (rep_id)
+);
+
 
 CREATE TABLE Orders (
   ord_id varchar(20) NOT NULL,
@@ -52,7 +59,9 @@ CREATE TABLE Orders (
 
   CONSTRAINT idx_ord_pk PRIMARY KEY (ord_id),
 
-  CONSTRAINT cust_FK FOREIGN KEY (cust_id) REFERENCES Customers(cust_id)
+  CONSTRAINT cust_FK FOREIGN KEY (cust_id) REFERENCES Customers(cust_id),
+  CONSTRAINT rep_FK FOREIGN KEY (rep) REFERENCES Reps(rep_id)
+
 );
 
 CREATE TABLE OrderLines (
@@ -65,9 +74,11 @@ CREATE TABLE OrderLines (
     
     CONSTRAINT idx_ord_line_pk PRIMARY KEY (ord_id , ord_line_id),
 
-    CONSTRAINT prod_FK FOREIGN KEY (prod_id)
-        REFERENCES Products (prod_id)
+    CONSTRAINT ord_FK FOREIGN KEY (ord_id) REFERENCES Orders (ord_id),
+    CONSTRAINT prod_FK FOREIGN KEY (prod_id) REFERENCES Products (prod_id)
 );
+
+
 
 -- CREATE TABLE CustomerLedger (
 --   cust_id varchar(20) NOT NULL,

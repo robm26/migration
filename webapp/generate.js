@@ -2,29 +2,43 @@ function generateDDB(tableMetadata, dataset) {
     let config = {
       newDateType:'S'
     };
+    // console.log(JSON.stringify(JSON.parse(tableMetadata), null, 2));
+    let tableJSON = JSON.parse(tableMetadata)['Table'];
 
     let ddbFormat = null;
 
-    let ADs = JSON.parse(tableMetadata)['Table']['AttributeDefinitions'];
-    const Ks = JSON.parse(tableMetadata)['Table']['KeySchema'];
-    const keyList = Ks.map((key) => key['AttributeName']);
+    let ADs = tableJSON['AttributeDefinitions'];
+    const Ks = tableJSON['KeySchema'];
+    const keyList = {};
+    Ks.map((key) => {
+        keyList[key['AttributeName']] = 1;
+    });
+
+    console.log(JSON.stringify(keyList, null, 2));
 
     if(!dataset) {
         const tmdFormatted = {
-            "TableName": "abc",
+            "TableName": "",
             "KeySchema": [],
             "AttributeDefinitions": [],
             "BillingMode": "PAY_PER_REQUEST"
         };
-        tmdFormatted['TableName'] = JSON.parse(tableMetadata)['Table']['TableName'];
-        tmdFormatted['KeySchema'] = JSON.parse(tableMetadata)['Table']['KeySchema'];
-        // let ADs = JSON.parse(tableMetadata)['Table']['AttributeDefinitions'];
-        // const Ks = JSON.parse(tableMetadata)['Table']['KeySchema'];
-        // const keyList = Ks.map((key) => key['AttributeName']);
+
+        if('GlobalSecondaryIndexes' in tableJSON ) {
+            tmdFormatted['GlobalSecondaryIndexes'] = tableJSON['GlobalSecondaryIndexes'];
+            tableJSON['GlobalSecondaryIndexes'].forEach((gsi)=> {
+                keyList[gsi['KeySchema'][0]['AttributeName']] = 1;
+                if(gsi['KeySchema'].length > 1) {
+                    keyList[gsi['KeySchema'][1]['AttributeName']] = 1;
+                }
+            });
+        }
+        tmdFormatted['TableName'] = tableJSON['TableName'];
+        tmdFormatted['KeySchema'] = tableJSON['KeySchema'];
 
         let newADs = [];
         ADs.forEach((attr, index)=> {
-            if(keyList.includes(attr['AttributeName'])) {
+            if(Object.keys(keyList).includes(attr['AttributeName'])) {
                 let attrType = attr['AttributeType'].slice(0,3);
                 if(attrType === 'int') {
                     newADs.push({"AttributeName": attr["AttributeName"], "AttributeType": "N"});
@@ -67,9 +81,7 @@ function generateDDB(tableMetadata, dataset) {
                     } else {
                         attrVal[attrTypeDDB] = item[attr];
                     }
-
                 }
-
                 newItem[attr] = attrVal;
             });
             return newItem;
@@ -77,9 +89,6 @@ function generateDDB(tableMetadata, dataset) {
         if(ddbFormat.length === 1) {
             ddbFormat = ddbFormat[0];
         }
-
     }
-
     return JSON.stringify(ddbFormat, null, 2);
-
 }

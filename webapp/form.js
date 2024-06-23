@@ -109,6 +109,8 @@ async function insertRowForm(table, itemKey, existingItem) {
     button.appendChild(document.createTextNode("SAVE"));
     cellF1.appendChild(button);
     rowFinal.appendChild(cellF1);
+
+    document.getElementById('generateType').innerHTML = 'Item as DynamoDB JSON';
 }
 
 
@@ -152,6 +154,7 @@ async function update(table, recordKey, formName) {
     if(responseJSON['status'] === 1) {
         log('1 record written');
         document.getElementById('dataset').value = '[' + JSON.stringify(formValuesJSON) + ']';
+
     } else {
         log(JSON.stringify(responseJSON));
     }
@@ -185,14 +188,15 @@ async function runQuery(table, queryRequest){
     if('status' in responseJSON) {
         log(responseJSON['status']);
     } else {
-        log(responseJSON.length + ' items returned');
+        const plural = responseJSON.length === 1 ? '' : 's';
+        log(responseJSON.length + ' item' + plural + ' returned');
 
         responseJSON.forEach((item, index) => {
             const cols = Object.keys(item);
 
-            if(index === 1) { // show column names
+            if(index === 0) { // show column names
                 const gridHeader = dataGrid.createTHead();
-                const row0 = gridHeader.insertRow(0);
+                const row0 = gridHeader.insertRow(-1);
                 cols.forEach((col) => {
                     const cell0 = row0.insertCell(-1);
                     cell0.className = "gridHeader";
@@ -228,12 +232,20 @@ async function runsql(){
     if('status' in responseJSON) {
         log(responseJSON['status']);
     } else {
-        log(responseJSON.length + ' items returned');
+        const plural = responseJSON.length === 1 ? '' : 's';
+        log(responseJSON.length + ' item' + plural + ' returned');
 
         responseJSON.forEach((item, index) => {
             const cols = Object.keys(item);
 
-            if(index === 1) { // show column names
+            const row = dataGrid.insertRow(-1);
+            cols.forEach((col) => {
+                const cell = row.insertCell(-1);
+                cell.innerText = item[col];
+                cell.className = 'gridData';
+            });
+
+            if(index === 0 ) { // show column names
                 const gridHeader = dataGrid.createTHead();
                 const row0 = gridHeader.insertRow(0);
                 cols.forEach((col) => {
@@ -242,12 +254,7 @@ async function runsql(){
                     cell0.innerHTML = col;
                 });
             }
-            const row = dataGrid.insertRow(-1);
-            cols.forEach((col) => {
-                const cell = row.insertCell(-1);
-                cell.innerText = item[col];
-                cell.className = 'gridData';
-            });
+
         });
     }
 

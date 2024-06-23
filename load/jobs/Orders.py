@@ -1,7 +1,7 @@
 import string
 import datetime
 import random
-random.seed(10)
+random.seed(11)
 
 def row_maker(tick):
 
@@ -13,7 +13,7 @@ def row_maker(tick):
     last_updated = str(datetime.datetime.strptime(start_date, '%m/%d/%Y') + datetime.timedelta(days=datedelta + 3))
 
     row = {
-        'ord_id': pk,
+        'ord_id': 'ord-' + str(pk),
         'cust_id': 'cust-' + str(random.randrange(1, 8)).rjust(4, '0'),
         'rep': random.choice(reps),
         'ord_date': ord_date,

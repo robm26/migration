@@ -1,10 +1,7 @@
 
 const dateConversionType = 'string'; // int
-const sqlSamples = [
 
-    "SELECT * \nFROM Customers",
-    "SELECT * \nFROM Orders"
-];
+const sqlSamples = getSqlSamples();
 
 function setCookie(value) {
 
@@ -52,14 +49,13 @@ async function renderNav() {
     const engine = rootTest['engine'];
     document.getElementById('engine').value = engine;
     document.getElementById('tablesButton').innerText = engine + ' tables';
-
-
 }
 
 function openTab(tabName) {
     clear('grid1');
     document.getElementById('tableCrudButtons').innerHTML = '';
     document.getElementById('tab').value = tabName;
+    document.getElementById('fkGrid').style.display = 'none';
 
     let x = document.getElementsByClassName("tab");
     for (let i = 0; i < x.length; i++) {
@@ -84,25 +80,21 @@ function openTab(tabName) {
     if(tabName === 'Querying') {
         descIndexesClick(document.getElementById('tableName').value);
     }
-
 }
 
 async function listTables() {
     clear('grid1');
     clear('tblForm');
 
-
     document.getElementById('tableCrudButtons').innerHTML = '';
     document.getElementById('generateDiv').className = 'GenHidden';
     document.getElementById('tableName').value = '';
+    document.getElementById('fkGrid').style.display = 'none';
     setTableTitle(); // clear it
 
     let tableListTable = document.getElementById("leftNavTable");
-    // let tableDetailsTable = document.getElementById("tableDetailsTable");
 
     tableListTable.innerHTML = null;
-    // tableDetailsTable.innerHTML = null;
-    // document.getElementById('generate').innerHTML = null;
 
     const list = await callApi('/list_tables');
 
@@ -119,11 +111,13 @@ async function listTables() {
         newButton.onclick = () => tableClickHandler(item);
 
         cell1.appendChild(newButton);
-
     });
 }
 async function tableClickHandler(table) {
     document.getElementById('tablePanel').className = 'tablePanel';
+
+    document.getElementById('fkGrid').style.display = 'none';
+
     setTableTitle(table);
 
     const resetButton = document.getElementsByClassName('tableButtonActive');
@@ -145,8 +139,6 @@ async function tableClickHandler(table) {
 }
 
 async function descTableClick(table) {
-    // let titles = document.getElementsByClassName('tableTitle');
-    // console.log(titles);
 
     clear('tblForm');
     document.getElementById('dataset').value = null;
@@ -156,8 +148,10 @@ async function descTableClick(table) {
     document.getElementById('tableName').value = table;
     document.getElementById('tableMetadata').value = JSON.stringify(tableMetadata);
 
+
     const ADs = tableMetadata['Table']['AttributeDefinitions'];
     const Ks = tableMetadata['Table']['KeySchema'];
+    const FKs = tableMetadata['Table']['ForeignKeys'];
     const keyList = Ks.map((key) => key['AttributeName']);
     let AdTypes = {};
     ADs.map((ad) => {
@@ -220,7 +214,6 @@ async function descTableClick(table) {
         input2.name = keyList[1];
         input2.className = 'pkFindBox';
         getCellSkInput.appendChild(input2);
-
     }
 
     cell3.appendChild(getTable);
@@ -237,15 +230,15 @@ async function descTableClick(table) {
     tableSchemaGrid(tableMetadata, 'grid1');
 
     document.getElementById('generateDiv').className = 'GenVisible';
-    // document.getElementById('generateType').innerHTML = 'DynamoDB Table Definition';
-
-
+    document.getElementById('generateType').innerHTML = 'DynamoDB Table Definition';
 }
 
 async function descIndexesClick(table) {
     clear('indexSummary');
     clear('tblForm');
     clear('indexSummaryList');
+    document.getElementById('generateIndexResults').style = "";
+    document.getElementById('generateIndexResults').className = 'GenHidden';
 
     document.getElementById('dataset').value = null;
 
@@ -254,6 +247,16 @@ async function descIndexesClick(table) {
         const descTableResult = await callApi('/desc_table/' + table);
 
         let tableMetadata = formatMetadata(descTableResult, table);
+        const FKs = tableMetadata['Table']['ForeignKeys'];
+        const fkCount = FKs ? FKs.length : 0;
+        console.log(fkCount);
+        if(fkCount === 0) {
+            document.getElementById('FKs').style = 'visibility:hidden; height:1px;';
+
+        } else {
+            document.getElementById('FKs').style = 'visibility:visible';
+        }
+
         document.getElementById('tableMetadata').value = JSON.stringify(tableMetadata);
 
         setTableTitle(table);
@@ -269,19 +272,33 @@ async function descIndexesClick(table) {
         tableMetadata = JSON.stringify(tableMetadata);
 
         const idxTable = document.getElementById('indexSummary');
-        const idxTableList = document.getElementById('indexSummaryList');
 
         let indexMetadata = [];
+        let secondaryIndexCount = 0;
 
         if (tableMetadata) {
             indexMetadata = JSON.parse(tableMetadata)['Table']['GlobalSecondaryIndexes'];
+            secondaryIndexCount = indexMetadata.length;
+            indexMetadata.unshift({
+                "IndexName": "PRIMARY",
+                "KeySchema": Ks
+            });
 
             indexMetadata.forEach((idxCol, idx) => {
 
                 if(idx === 0) {
                     const row0 = idxTable.insertRow(-1);
                     const cell0 = row0.insertCell();
-                    cell0.innerHTML = 'Secondary Index : ';
+                    cell0.innerHTML = 'Base Table : ';
+                    cell0.style = "padding-top:10px;";
+                    cell0.colSpan = 2;
+                }
+                if(idx === 1) {
+                    const row0 = idxTable.insertRow(-1);
+                    const cell0 = row0.insertCell();
+
+                    cell0.innerHTML = indexMetadata.length > 2  ? 'Secondary Indexes : ' : 'Secondary Index : ';
+                    cell0.colSpan = 2;
                 }
 
                 let ksLength = idxCol['KeySchema'].length;
@@ -291,6 +308,8 @@ async function descIndexesClick(table) {
                 idxCol['KeySchema'].forEach((key, idxKey) => {
 
                     const row = idxTable.insertRow(-1);
+                    const cellIndent = row.insertCell();
+                    cellIndent.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 
                     if(idxKey === 0) {
                         const cell1 = row.insertCell();
@@ -315,7 +334,7 @@ async function descIndexesClick(table) {
                     const inputBox = document.createElement('input');
                     inputBox.id = 'isBox' + idx + '#' + idxKey;
                     inputBox.style = 'width:100px;';
-                    inputBox.value = 'eee';
+                    inputBox.value = '';
                     cell4.appendChild(inputBox);
 
                     const cell5 = row.insertCell();
@@ -335,14 +354,11 @@ async function descIndexesClick(table) {
                             sql += key + '="' + qr['queryRequest']['queryConditions'][key] + '"';
                             if(Object.keys(qr['queryRequest']['queryConditions']).length - 1 > idxCondition) {
                                 sql += '\n  AND ';
-                            } else {
-                                sql += ';';
                             }
                         });
                         updateSQL(sql);  // update but call runQuery() and not runsql()
 
                         runQuery(table, qr);
-
                     };
                     cell5.appendChild(indexSearchButton);
 
@@ -353,25 +369,31 @@ async function descIndexesClick(table) {
                     }
                 });
             });
+            document.getElementById('generateIndexDiv').className = secondaryIndexCount > 0 ? 'GenVisible' : 'GenHidden';
         }
     }
 
     const sampleButtonsSpan = document.getElementById('sampleButtons');
-    sampleButtonsSpan.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp; SQL Examples : ';
+    sampleButtonsSpan.innerHTML = 'SQL Examples : ';
+    let i = 0;
 
     sqlSamples.forEach((sample, idx) => {
-        const newButton = document.createElement('button');
-        newButton.textContent = 'S' + (idx + 1);
-        // newButton.className = "tableButton";
-        newButton.onclick = () => updateSQL(sample);
-        sampleButtonsSpan.appendChild(newButton);
-    });
 
+        const newButton = document.createElement('button');
+        const br = document.createElement('br');
+        if(sample.length === 0) {
+            sampleButtonsSpan.appendChild(document.createTextNode(" - - - "));
+        } else {
+            i += 1;
+            newButton.textContent = 'S ' + i;
+            newButton.onclick = () => updateSQL(sample);
+            sampleButtonsSpan.appendChild(newButton);
+        }
+    });
 }
 
 function updateSQL(sql) {
     document.getElementById('sqlText').value = sql;
-
 }
 async function scanTable(table) {
 
@@ -385,7 +407,7 @@ async function scanTable(table) {
     const tableMetadata = document.getElementById('tableMetadata').value;
 
     fillGrid(scanData, 'grid1', table, tableMetadata);
-    // document.getElementById('generateType').innerHTML = 'Dataset as DynamoDB JSON';
+    document.getElementById('generateType').innerHTML = 'Dataset as DynamoDB JSON';
 
 }
 async function getItem(table, formName) {
@@ -407,7 +429,7 @@ async function getItem(table, formName) {
     if(responseJSON.length === 0) {
         log('item not found');
         document.getElementById('generateDiv').className = 'GenHidden';
-        // document.getElementById('dataset').value = '0';
+
     } else {
         document.getElementById('generateDiv').className = 'GenVisible';
         document.getElementById('dataset').value = JSON.stringify(responseJSON);
@@ -419,42 +441,103 @@ async function getItem(table, formName) {
 
 function generate(type) {
 
-    const textBox = document.getElementById('textGen');
-    const tableMetadata = document.getElementById('tableMetadata').value;
+    const tableMetadataFull = document.getElementById('tableMetadata').value;
     const dataset =  document.getElementById('dataset').value;
 
-    let generateType = 'table';
+    let tableMetadataJSON = JSON.parse(tableMetadataFull);
 
-    if(dataset.length > 0) {
-
-        if(JSON.parse(dataset).length === 1) {
-            generateType = 'record';
-        } else {
-            generateType = 'dataset';
-        }
+    if(type && type==='indexes') {
+        // leave GSIs intact
+    } else {
+        // create table definition without indexes
+        tableMetadataJSON['Table']['GlobalSecondaryIndexes'] = [];
     }
-    generateType = type || generateType;
+    const tableMetadata = JSON.stringify(tableMetadataJSON);
 
-    const tmdFormatted = {
-        "Table": {
-            "TableName": "abc",
-            "KeySchema": [],
-            "AttributeDefinitions": []
-        }
-    };
-    tmdFormatted['Table']['TableName'] = JSON.parse(tableMetadata)['Table']['TableName'];
-    tmdFormatted['Table']['KeySchema'] = JSON.parse(tableMetadata)['Table']['KeySchema'];
-    tmdFormatted['Table']['AttributeDefinitions'] = JSON.parse(tableMetadata)['Table']['AttributeDefinitions'];
+    let textBox;
+    let genDiv;
+
+    if(type === 'indexes') {
+        textBox = document.getElementById('textGenIndex');
+        genDiv = document.getElementById('generateIndexResults');
+    } else {
+        textBox = document.getElementById('textGen');
+        genDiv = document.getElementById('generateResults');
+    }
 
     const generated = generateDDB(tableMetadata, dataset);
     textBox.value = generated;
-    document.getElementById('generateResults').style.display = 'block';
+    // genDiv.style.display = 'block';
+    genDiv.style.display = genDiv.style.display === 'block' ? 'none' : 'block';
 
     return {};
 }
 
-function copyText() {
-    const textGen = document.getElementById('textGen');
+function showFKs() {
+    const tblDiv = document.getElementById('fkGrid');
+    tblDiv.style.display = tblDiv.style.display === 'block' ? 'none' : 'block';
+    const tableMetadataFull = document.getElementById('tableMetadata').value;
+
+    if(tableMetadataFull) {
+        const FKs = JSON.parse(tableMetadataFull)['Table']['ForeignKeys'];
+        const tableName = JSON.parse(tableMetadataFull)['Table']['TableName'];
+
+        const tblDiv = document.getElementById('fkGrid');
+        tblDiv.innerHTML = null;
+
+        if(FKs) {
+            Object.keys(FKs).forEach((key) => {
+                const tbl = document.createElement('table');
+                tbl.className = 'fkTable';
+
+                const row = tbl.insertRow(-1);
+                const cell1 = row.insertCell();
+                cell1.innerHTML = FKs[key]['ConstraintName'];
+                cell1.colSpan = 2;
+                cell1.style = 'font-weight:bold';
+
+                let conditionString = tableName + '.' + FKs[key]['ColumnName'];
+                conditionString += ' = ' + FKs[key]['ReferencedTable'] + '.' + FKs[key]['ReferencedColumn'];
+
+                const row1 = tbl.insertRow(-1);
+                const cell3 = row1.insertCell();
+                cell3.innerHTML = 'Relationship';
+
+                const cell4 = row1.insertCell();
+                cell4.innerHTML = '<pre>'  + conditionString + '</pre>';
+
+                let sqlString = 'SELECT\n   ' + tableName + '.*, ' + FKs[key]['ReferencedTable'] + '.*\n';
+                sqlString += 'FROM\n   ' + tableName + '\n   INNER JOIN ' + FKs[key]['ReferencedTable'] + '\n     ON ' + conditionString;
+
+                const row2 = tbl.insertRow(-1);
+                const cell5 = row2.insertCell();
+                cell5.innerHTML = 'SQL';
+
+                const cell6 = row2.insertCell();
+                const btn1 = document.createElement('button');
+                btn1.textContent = 'Paste to editor';
+                btn1.onclick = () => updateSQL(sqlString);
+                cell6.appendChild(btn1);
+
+                tblDiv.appendChild(tbl);
+
+            });
+        }
+
+        // fillGrid(FKs, 'fkGrid');
+
+    }
+    let tableMetadataJSON = JSON.parse(tableMetadataFull);
+    // fillGrid(FKs, 'fkGrid');
+
+}
+function copyText(type) {
+    let textGen;
+    if(type === 'indexes') {
+        textGen = document.getElementById('textGenIndex');
+    } else {
+        textGen = document.getElementById('textGen');
+    }
     textGen.focus();
     textGen.select();
 
@@ -464,7 +547,6 @@ function copyText() {
     } catch (err) {
         console.log('unable to copy');
     }
-    console.log('copied');
 
 }
 function log(msg, status) {

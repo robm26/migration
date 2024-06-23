@@ -13,9 +13,7 @@
     <link rel="icon" type="image/x-icon" href="https://dynamodbworkshop.s3.amazonaws.com/favicon.ico">
     <link rel="stylesheet" href="index.css">
 
-    <style>
-
-    </style>
+    <script src="./sql-samples.js" defer></script>
     <script src="./index.js" defer></script>
     <script src="./api.js" defer></script>
     <script src="./form.js" defer></script>
@@ -56,7 +54,6 @@
                         Access pattern:
                         <button class="tabActive" onclick="openTab('CRUD')">CRUD</button>
                         <button class="tabInactive" onclick="openTab('Querying')">Querying</button>
-                        <button class="tabInactive" onclick="openTab('Joins')">Joins</button>
                         <button class="tabInactive" onclick="openTab('Multi-step')">Multi-step</button>
                     </div>
                 </div>
@@ -96,23 +93,18 @@
                                     <div id="generateDiv" class="GenHidden">
                                         <button id="btnGenerate" onClick="generate()">GENERATE</button>
                                         <span id="generateType"></span>
-                                        <br/>
-                                        <br/>
+                                        <br/><br/>
                                         <div class="generateResults" id="generateResults">
                                             <button id="btnCopy" onClick="copyText()">COPY</button><br/>
                                             <textarea id="textGen" ></textarea>
                                         </div>
-
                                     </div>
-
                                 </td>
-
                             <tr>
                                 <td id="tableListTd" class="tableButtonCell">
                                     <table id="tableList"></table>
                                 </td>
                             </tr>
-
                         </table>
                     </div>
 
@@ -122,30 +114,40 @@
 
                         <div>
                             <form id="formQuerying" method="post" action="" onsubmit="return false;">
-                                Primary Key index :
-                                <table id="indexSummary" class="indexSummary"></table>
-                                <ul id="indexSummaryList"></ul>
 
-                                <br/>
+                                <table id="indexSummary" class="indexSummary"></table>
+
+                                <div id="generateIndexDiv" class="GenHidden">
+                                    <button id="btnGenerateIndexes" onClick="generate('indexes')">GENERATE</button>
+                                    <span> DynamoDB table definition with these indexes</span>
+                                    <br/>
+                                    <br/>
+                                    <div class="generateResults" id="generateIndexResults">
+                                        <button onClick="copyText('indexes')">COPY</button><br/>
+                                        <textarea id="textGenIndex" ></textarea>
+                                    </div>
+                                </div>
+                                <div id="foreignKey">
+                                    <div id="FKs">
+                                        <button id="btnFKs" onclick="showFKs()">Foreign Key relationships </button>
+                                        <div id="fkGrid"></div>
+                                    </div>
+                                </div>
+
                                 <div class="sqlPanel" >
+                                    <span id="sampleButtons"></span>
+                                    <br/><br/>
                                     <button class="sqlButton" onClick="runsql()">RUN SQL</button>
                                     <button class="sqlButtonClear" onClick="clearsql()">CLEAR</button>
 
-                                    <span id="sampleButtons"></span>
-
                                     <div id="log2" class="log">log2</div>
 
-                                    <textarea id="sqlText" class="sqlText">SELECT prod_id, name, category, list_price FROM Products LIMIT 3</textarea>
+                                    <textarea id="sqlText" class="sqlText" >SELECT ...</textarea>
                                 </div>
                             </form>
                         </div>
                         <table id="sqlGrid" class="gridDiv"></table>
 
-                    </div>
-
-                    <div id="Joins" class="tab" style="display:none">
-                        Joins
-                        <p>Combining data from multiple tables</p>
                     </div>
 
                     <div id="Multi-step" class="tab" style="display:none">
@@ -154,15 +156,12 @@
                             <li>
                                 <p>Multi-step actions involving reading & writing, such as:
                                 <pre> UPDATE/DELETE MyTable<br/> WHERE <br/>&nbsp;&nbsp;&nbsp;(subquery is true) </pre>
-                                These can be implemented as jobs with put-item calls from your compute runtime.
                                 </p>
                             </li>
-                            <li>
-                                Business logic in stored procedures, other SQL text expressions, same.
-                            </li>
-
+                            <li>SQL text expressions</li>
+                            <li>Business logic in stored procedures</li>
                         </ul>
-
+                        These can be implemented as a custom job running outside of DynamoDB, that performs operations in a loop.
 
                     </div>
 

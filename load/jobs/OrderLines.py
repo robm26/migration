@@ -6,9 +6,9 @@ random.seed(9)
 
 def row_maker(tick):
 
-    lines_per_order = 3
+    lines_per_order = 4
 
-    ord_id = str(math.floor((tick+2)/lines_per_order)).rjust(4, '0')
+    ord_id = str(math.floor(((tick+2)/lines_per_order)+1)).rjust(4, '0')
     ord_line_id = str(((tick+2)%lines_per_order)+1)
     prod_id = 'prod-' + str(random.randrange(1, 13)).rjust(4, '0')
 
@@ -16,7 +16,7 @@ def row_maker(tick):
     last_updated = str(datetime.datetime.strptime(start_date, '%m/%d/%Y') + datetime.timedelta(days=datedelta + 3))
 
     row = {
-        'ord_id': ord_id,
+        'ord_id': 'ord-' + str(ord_id),
         'ord_line_id': ord_line_id,
         'prod_id': prod_id,
         'qty': random.randrange(1,10),
