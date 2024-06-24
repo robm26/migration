@@ -5,7 +5,7 @@ ENDPOINTURL=https://dynamodb.$REGION.amazonaws.com
 OUTPUT=text
 
 # TableList=("DemoTable01" "DemoTable02" "DemoTable03" "DemoTable04")
-TableList=("Customers")
+TableList=("Customers" "Orders" "OrderLines" "Products")
 TableName=""
 
 if [ $# -gt 0 ]

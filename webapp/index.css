@@ -502,3 +502,8 @@ input {
 .fkTable tr:first-child td {
     background-color:#888;
 }
+.about {
+    text-decoration:none;
+    color:navy;
+    font-size:smaller;
+}

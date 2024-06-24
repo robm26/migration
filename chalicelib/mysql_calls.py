@@ -82,7 +82,7 @@ def desc_table(table):
     request += "WHERE CONSTRAINT_NAME != 'PRIMARY' "
     request += "AND TABLE_SCHEMA = '" + mysql_db + "' AND TABLE_NAME = '" + table + "';"
 
-    print(request)
+    # print(request)
 
     mysql_cur.execute(request)
     result = mysql_cur.fetchall()

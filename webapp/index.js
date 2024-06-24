@@ -249,9 +249,9 @@ async function descIndexesClick(table) {
         let tableMetadata = formatMetadata(descTableResult, table);
         const FKs = tableMetadata['Table']['ForeignKeys'];
         const fkCount = FKs ? FKs.length : 0;
-        console.log(fkCount);
+
         if(fkCount === 0) {
-            document.getElementById('FKs').style = 'visibility:hidden; height:1px;';
+            document.getElementById('FKs').style = 'visibility:hidden;';
 
         } else {
             document.getElementById('FKs').style = 'visibility:visible';

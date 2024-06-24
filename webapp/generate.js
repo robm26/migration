@@ -2,7 +2,7 @@ function generateDDB(tableMetadata, dataset) {
     let config = {
       newDateType:'S'
     };
-    // console.log(JSON.stringify(JSON.parse(tableMetadata), null, 2));
+
     let tableJSON = JSON.parse(tableMetadata)['Table'];
 
     let ddbFormat = null;
@@ -14,10 +14,8 @@ function generateDDB(tableMetadata, dataset) {
         keyList[key['AttributeName']] = 1;
     });
 
-    console.log(JSON.stringify(keyList, null, 2));
-
     if(!dataset) {
-        const tmdFormatted = {
+        let tmdFormatted = {
             "TableName": "",
             "KeySchema": [],
             "AttributeDefinitions": [],
@@ -26,7 +24,9 @@ function generateDDB(tableMetadata, dataset) {
 
         if('GlobalSecondaryIndexes' in tableJSON ) {
             tmdFormatted['GlobalSecondaryIndexes'] = tableJSON['GlobalSecondaryIndexes'];
+
             tableJSON['GlobalSecondaryIndexes'].forEach((gsi)=> {
+                gsi['Projection'] = {"ProjectionType": "ALL"};
                 keyList[gsi['KeySchema'][0]['AttributeName']] = 1;
                 if(gsi['KeySchema'].length > 1) {
                     keyList[gsi['KeySchema'][1]['AttributeName']] = 1;
